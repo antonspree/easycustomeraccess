@@ -9,7 +9,7 @@ export default async function NewCustomerPage() {
   const { agency } = await requireSession()
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
       <Card>
         <CardHeader>
           <CardTitle>Kunde und Einrichtung</CardTitle>
@@ -21,6 +21,6 @@ export default async function NewCustomerPage() {
           <CreateSetupForm agencyEmail={agency.email} />
         </CardContent>
       </Card>
-    </main>
+    </div>
   )
 }

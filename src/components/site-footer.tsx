@@ -1,6 +1,20 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function SiteFooter() {
+  const pathname = usePathname()
+  const ownChrome =
+    pathname === "/anmelden" ||
+    pathname === "/registrieren" ||
+    pathname.startsWith("/uebersicht") ||
+    pathname.startsWith("/kunden") ||
+    pathname.startsWith("/team") ||
+    pathname.startsWith("/agentur") ||
+    pathname.startsWith("/benachrichtigungen")
+  if (ownChrome) return null
+
   return (
     <footer className="border-t bg-card">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-end sm:justify-between">

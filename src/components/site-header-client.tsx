@@ -22,6 +22,16 @@ export function SiteHeaderClient({
   session: { agencyName: string; memberName: string; unread: number } | null
 }) {
   const pathname = usePathname()
+  const ownChrome =
+    pathname === "/anmelden" ||
+    pathname === "/registrieren" ||
+    pathname.startsWith("/uebersicht") ||
+    pathname.startsWith("/kunden") ||
+    pathname.startsWith("/team") ||
+    pathname.startsWith("/agentur") ||
+    pathname.startsWith("/benachrichtigungen")
+  if (ownChrome) return null
+
   const customerView = pathname.startsWith("/einrichten")
 
   if (customerView) {

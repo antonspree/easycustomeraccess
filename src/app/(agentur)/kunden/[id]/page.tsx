@@ -31,7 +31,7 @@ export default async function CustomerPage({
   const customer = await getCustomerForAgency(agency.id, id)
   if (!customer) {
     return (
-      <main className="mx-auto flex w-full max-w-3xl px-4 py-8">
+      <div className="mx-auto flex w-full max-w-3xl px-4 py-8">
         <Empty className="border bg-card">
           <EmptyHeader>
             <EmptyTitle>Kunde nicht gefunden</EmptyTitle>
@@ -43,7 +43,7 @@ export default async function CustomerPage({
             <Button render={<Link href="/uebersicht" />}>Zur Übersicht</Button>
           </EmptyContent>
         </Empty>
-      </main>
+      </div>
     )
   }
   const origin = await publicOrigin()
@@ -56,7 +56,7 @@ export default async function CustomerPage({
   const owner = member.role === "inhaber"
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-3xl">{customer.name}</h1>
@@ -140,6 +140,6 @@ export default async function CustomerPage({
           </CardContent>
         </Card>
       ) : null}
-    </main>
+    </div>
   )
 }
