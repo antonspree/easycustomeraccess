@@ -1,9 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto"
-import { mkdirSync } from "node:fs"
-import path from "node:path"
-import { DatabaseSync } from "node:sqlite"
 import { hashPassword, verifyPassword } from "@/lib/password"
 import { getProvider } from "@/lib/providers/catalog"
+import { many, one, run, transaction } from "@/lib/query"
 
 export type Agency = {
   id: string
@@ -126,184 +124,17 @@ type ConfirmationRow = {
   confirmed_at: string
 }
 
-const SCHEMA_VERSION = 2
-
-const globalForDb = globalThis as unknown as {
-  ecaDb?: DatabaseSync
-  ecaSchema?: number
-}
-
-function databasePath() {
-  if (process.env.ECA_DB_PATH) return process.env.ECA_DB_PATH
-  const dir = path.join(process.cwd(), "data")
-  mkdirSync(dir, { recursive: true })
-  return path.join(dir, "eca.sqlite")
-}
-
-function columnExists(db: DatabaseSync, table: string, column: string) {
-  const info = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
-  return info.some((entry) => entry.name === column)
-}
-
-function ensureColumn(db: DatabaseSync, table: string, column: string, definition: string) {
-  if (!columnExists(db, table, column)) {
-    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
-  }
-}
-
-function migrate(db: DatabaseSync) {
-  db.exec(`
-    PRAGMA journal_mode = WAL;
-    PRAGMA foreign_keys = ON;
-
-    CREATE TABLE IF NOT EXISTS agencies (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      token TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      expires_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS customers (
-      id TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      UNIQUE (agency_id, email)
-    );
-
-    CREATE TABLE IF NOT EXISTS setups (
-      id TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      customer_id TEXT NOT NULL REFERENCES customers(id),
-      token TEXT NOT NULL UNIQUE,
-      created_at TEXT NOT NULL,
-      opened_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS setup_providers (
-      setup_id TEXT NOT NULL REFERENCES setups(id),
-      provider_id TEXT NOT NULL,
-      position INTEGER NOT NULL,
-      PRIMARY KEY (setup_id, provider_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS step_confirmations (
-      setup_id TEXT NOT NULL REFERENCES setups(id),
-      provider_id TEXT NOT NULL,
-      step_id TEXT NOT NULL,
-      confirmed_email TEXT NOT NULL,
-      confirmed_at TEXT NOT NULL,
-      PRIMARY KEY (setup_id, provider_id, step_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS members (
-      id TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS member_invites (
-      token TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      email TEXT NOT NULL,
-      role TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      accepted_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS notifications (
-      id TEXT PRIMARY KEY,
-      agency_id TEXT NOT NULL REFERENCES agencies(id),
-      title TEXT NOT NULL,
-      body TEXT NOT NULL,
-      href TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS notification_reads (
-      notification_id TEXT NOT NULL REFERENCES notifications(id),
-      member_id TEXT NOT NULL REFERENCES members(id),
-      read_at TEXT NOT NULL,
-      PRIMARY KEY (notification_id, member_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS step_blocks (
-      setup_id TEXT NOT NULL REFERENCES setups(id),
-      provider_id TEXT NOT NULL,
-      step_id TEXT NOT NULL,
-      note TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      resolved_at TEXT,
-      PRIMARY KEY (setup_id, provider_id, step_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS invitation_checks (
-      setup_id TEXT NOT NULL REFERENCES setups(id),
-      provider_id TEXT NOT NULL,
-      step_id TEXT NOT NULL,
-      accepted_at TEXT NOT NULL,
-      member_id TEXT NOT NULL REFERENCES members(id),
-      PRIMARY KEY (setup_id, provider_id, step_id)
-    );
-  `)
-
-  ensureColumn(db, "customers", "archived_at", "TEXT")
-  ensureColumn(db, "sessions", "member_id", "TEXT")
-
-  const agencies = db
-    .prepare("SELECT id, name, email, password_hash, created_at FROM agencies")
-    .all() as AgencyRow[]
-  const insertMember = db.prepare(
-    "INSERT INTO members (id, agency_id, name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, 'inhaber', ?)",
-  )
-  for (const agency of agencies) {
-    const existing = db
-      .prepare("SELECT id FROM members WHERE agency_id = ? LIMIT 1")
-      .get(agency.id) as { id: string } | undefined
-    if (!existing) {
-      insertMember.run(
-        randomUUID(),
-        agency.id,
-        agency.name,
-        agency.email,
-        agency.password_hash,
-        agency.created_at,
-      )
-    }
-  }
-
-  db.exec(`
-    UPDATE sessions
-    SET member_id = (
-      SELECT id FROM members
-      WHERE members.agency_id = sessions.agency_id AND members.role = 'inhaber'
-      LIMIT 1
-    )
-    WHERE member_id IS NULL
-  `)
-}
 
 export function getDb() {
-  if (!globalForDb.ecaDb) {
-    globalForDb.ecaDb = new DatabaseSync(databasePath())
+  return {
+    prepare(sql: string) {
+      return {
+        get: (...params: unknown[]) => one(sql, params),
+        all: (...params: unknown[]) => many(sql, params),
+        run: (...params: unknown[]) => run(sql, params),
+      }
+    },
   }
-  if (globalForDb.ecaSchema !== SCHEMA_VERSION) {
-    migrate(globalForDb.ecaDb)
-    globalForDb.ecaSchema = SCHEMA_VERSION
-  }
-  return globalForDb.ecaDb
 }
 
 function toAgency(row: AgencyRow): Agency {
@@ -351,8 +182,8 @@ function toSetup(row: SetupRow): SetupRecord {
   }
 }
 
-export function findAgencyByEmail(email: string) {
-  const row = getDb()
+export async function findAgencyByEmail(email: string) {
+  const row = await getDb()
     .prepare(
       "SELECT id, name, email, password_hash, created_at FROM agencies WHERE email = ?",
     )
@@ -360,8 +191,8 @@ export function findAgencyByEmail(email: string) {
   return row ?? null
 }
 
-export function findMemberByEmail(email: string) {
-  const row = getDb()
+export async function findMemberByEmail(email: string) {
+  const row = await getDb()
     .prepare(
       "SELECT id, agency_id, name, email, password_hash, role, created_at FROM members WHERE email = ?",
     )
@@ -369,12 +200,12 @@ export function findMemberByEmail(email: string) {
   return row ?? null
 }
 
-export function createAgency(input: {
+export async function createAgency(input: {
   name: string
   email: string
   password: string
 }) {
-  if (findAgencyByEmail(input.email) || findMemberByEmail(input.email)) {
+  if ((await findAgencyByEmail(input.email)) || (await findMemberByEmail(input.email))) {
     return { ok: false as const, error: "Für diese E-Mail gibt es schon eine Agentur." }
   }
   const now = new Date().toISOString()
@@ -394,45 +225,41 @@ export function createAgency(input: {
     role: "inhaber",
     created_at: now,
   }
-  const db = getDb()
-  db.exec("BEGIN")
-  try {
-    db.prepare(
+  await transaction(async () => {
+    await run(
       "INSERT INTO agencies (id, name, email, password_hash, created_at) VALUES (?, ?, ?, ?, ?)",
-    ).run(agency.id, agency.name, agency.email, agency.password_hash, agency.created_at)
-    db.prepare(
-      "INSERT INTO members (id, agency_id, name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    ).run(
-      member.id,
-      member.agency_id,
-      member.name,
-      member.email,
-      member.password_hash,
-      member.role,
-      member.created_at,
+      [agency.id, agency.name, agency.email, agency.password_hash, agency.created_at],
     )
-    db.exec("COMMIT")
-  } catch (error) {
-    db.exec("ROLLBACK")
-    throw error
-  }
+    await run(
+      "INSERT INTO members (id, agency_id, name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        member.id,
+        member.agency_id,
+        member.name,
+        member.email,
+        member.password_hash,
+        member.role,
+        member.created_at,
+      ],
+    )
+  })
   return { ok: true as const, agency: toAgency(agency), member: toMember(member) }
 }
 
-export function authenticateMember(email: string, password: string) {
-  const row = findMemberByEmail(email)
+export async function authenticateMember(email: string, password: string) {
+  const row = await findMemberByEmail(email)
   if (!row || !verifyPassword(password, row.password_hash)) return null
-  const agency = getDb()
+  const agency = await getDb()
     .prepare("SELECT id, name, email, password_hash, created_at FROM agencies WHERE id = ?")
     .get(row.agency_id) as AgencyRow | undefined
   if (!agency) return null
   return { agency: toAgency(agency), member: toMember(row) }
 }
 
-export function createSession(memberId: string, agencyId: string) {
+export async function createSession(memberId: string, agencyId: string) {
   const token = randomBytes(32).toString("base64url")
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString()
-  getDb()
+  await getDb()
     .prepare(
       "INSERT INTO sessions (token, agency_id, expires_at, member_id) VALUES (?, ?, ?, ?)",
     )
@@ -440,12 +267,12 @@ export function createSession(memberId: string, agencyId: string) {
   return { token, expiresAt }
 }
 
-export function deleteSession(token: string) {
-  getDb().prepare("DELETE FROM sessions WHERE token = ?").run(token)
+export async function deleteSession(token: string) {
+  await getDb().prepare("DELETE FROM sessions WHERE token = ?").run(token)
 }
 
-export function getSession(token: string) {
-  const row = getDb()
+export async function getSession(token: string) {
+  const row = await getDb()
     .prepare(
       `SELECT s.expires_at,
               a.id AS agency_id, a.name AS agency_name, a.email AS agency_email,
@@ -476,7 +303,7 @@ export function getSession(token: string) {
     | undefined
   if (!row) return null
   if (new Date(row.expires_at).getTime() < Date.now()) {
-    deleteSession(token)
+    await deleteSession(token)
     return null
   }
   return {
@@ -499,8 +326,8 @@ export function getSession(token: string) {
   }
 }
 
-export function findCustomerByEmail(agencyId: string, email: string) {
-  const row = getDb()
+export async function findCustomerByEmail(agencyId: string, email: string) {
+  const row = await getDb()
     .prepare(
       `SELECT ${customerColumns} FROM customers WHERE agency_id = ? AND email = ?`,
     )
@@ -508,12 +335,12 @@ export function findCustomerByEmail(agencyId: string, email: string) {
   return row ? toCustomer(row) : null
 }
 
-function loadExtras(setupIds: string[]) {
+async function loadExtras(setupIds: string[]) {
   const blocks = new Map<string, StepBlock[]>()
   const invitations = new Map<string, InvitationAcceptance[]>()
   if (setupIds.length === 0) return { blocks, invitations }
   const placeholders = setupIds.map(() => "?").join(", ")
-  const blockRows = getDb()
+  const blockRows = await getDb()
     .prepare(
       `SELECT setup_id, provider_id, step_id, note, created_at, resolved_at
        FROM step_blocks WHERE setup_id IN (${placeholders})`,
@@ -537,7 +364,7 @@ function loadExtras(setupIds: string[]) {
     })
     blocks.set(row.setup_id, list)
   }
-  const inviteRows = getDb()
+  const inviteRows = await getDb()
     .prepare(
       `SELECT i.setup_id, i.provider_id, i.step_id, i.accepted_at, i.member_id, m.name AS member_name
        FROM invitation_checks i
@@ -566,18 +393,18 @@ function loadExtras(setupIds: string[]) {
   return { blocks, invitations }
 }
 
-function loadProviders(setupIds: string[]) {
+async function loadProviders(setupIds: string[]) {
   const providers = new Map<string, SetupProviderRecord[]>()
   const confirmations = new Map<string, StepConfirmation[]>()
   if (setupIds.length === 0) return providers
 
   const placeholders = setupIds.map(() => "?").join(", ")
-  const providerRows = getDb()
+  const providerRows = await getDb()
     .prepare(
       `SELECT setup_id, provider_id, position FROM setup_providers WHERE setup_id IN (${placeholders}) ORDER BY position ASC`,
     )
     .all(...setupIds) as ProviderRow[]
-  const confirmationRows = getDb()
+  const confirmationRows = await getDb()
     .prepare(
       `SELECT setup_id, provider_id, step_id, confirmed_email, confirmed_at
        FROM step_confirmations WHERE setup_id IN (${placeholders})`,
@@ -609,10 +436,10 @@ function loadProviders(setupIds: string[]) {
   return providers
 }
 
-function bundlesFor(rows: SetupRow[]) {
+async function bundlesFor(rows: SetupRow[]) {
   const ids = rows.map((row) => row.id)
-  const providers = loadProviders(ids)
-  const extras = loadExtras(ids)
+  const providers = await loadProviders(ids)
+  const extras = await loadExtras(ids)
   return rows.map((row) => ({
     ...toSetup(row),
     providers: providers.get(row.id) ?? [],
@@ -621,13 +448,13 @@ function bundlesFor(rows: SetupRow[]) {
   }))
 }
 
-export function createCustomerWithSetup(input: {
+export async function createCustomerWithSetup(input: {
   agencyId: string
   name: string
   email: string
   providerIds: string[]
 }) {
-  const duplicate = findCustomerByEmail(input.agencyId, input.email)
+  const duplicate = await findCustomerByEmail(input.agencyId, input.email)
   if (duplicate) {
     return {
       ok: false as const,
@@ -643,7 +470,6 @@ export function createCustomerWithSetup(input: {
     return { ok: false as const, error: "Wählen Sie mindestens einen Anbieter." }
   }
 
-  const db = getDb()
   const customer: CustomerRow = {
     id: randomUUID(),
     agency_id: input.agencyId,
@@ -661,41 +487,32 @@ export function createCustomerWithSetup(input: {
     opened_at: null,
   }
 
-  db.exec("BEGIN")
-  try {
-    db.prepare(
+  await transaction(async () => {
+    await run(
       "INSERT INTO customers (id, agency_id, name, email, created_at, archived_at) VALUES (?, ?, ?, ?, ?, NULL)",
-    ).run(
-      customer.id,
-      customer.agency_id,
-      customer.name,
-      customer.email,
-      customer.created_at,
+      [customer.id, customer.agency_id, customer.name, customer.email, customer.created_at],
     )
-    db.prepare(
+    await run(
       "INSERT INTO setups (id, agency_id, customer_id, token, created_at, opened_at) VALUES (?, ?, ?, ?, ?, NULL)",
-    ).run(setup.id, setup.agency_id, setup.customer_id, setup.token, setup.created_at)
-    const insertProvider = db.prepare(
-      "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
+      [setup.id, setup.agency_id, setup.customer_id, setup.token, setup.created_at],
     )
-    known.forEach((providerId, position) => {
-      insertProvider.run(setup.id, providerId, position)
-    })
-    db.exec("COMMIT")
-  } catch (error) {
-    db.exec("ROLLBACK")
-    throw error
-  }
+    for (const [position, providerId] of known.entries()) {
+      await run(
+        "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
+        [setup.id, providerId, position],
+      )
+    }
+  })
 
   return {
     ok: true as const,
     customer: toCustomer(customer),
-    setup: bundlesFor([setup])[0],
+    setup: (await bundlesFor([setup]))[0],
   }
 }
 
-export function listCustomersForAgency(agencyId: string, archived = false) {
-  const customers = getDb()
+export async function listCustomersForAgency(agencyId: string, archived = false) {
+  const customers = await getDb()
     .prepare(
       `SELECT ${customerColumns} FROM customers
        WHERE agency_id = ? AND archived_at IS ${archived ? "NOT NULL" : "NULL"}
@@ -706,76 +523,76 @@ export function listCustomersForAgency(agencyId: string, archived = false) {
 
   const ids = customers.map((customer) => customer.id)
   const placeholders = ids.map(() => "?").join(", ")
-  const setups = getDb()
+  const setups = await getDb()
     .prepare(
       `SELECT id, agency_id, customer_id, token, created_at, opened_at
        FROM setups WHERE agency_id = ? AND customer_id IN (${placeholders})
        ORDER BY created_at ASC`,
     )
     .all(agencyId, ...ids) as SetupRow[]
-  const bundled = bundlesFor(setups)
+  const bundled = await bundlesFor(setups)
   return customers.map((customer) => ({
     ...toCustomer(customer),
     setups: bundled.filter((setup) => setup.customerId === customer.id),
   }))
 }
 
-export function getCustomerForAgency(agencyId: string, customerId: string) {
-  const row = getDb()
+export async function getCustomerForAgency(agencyId: string, customerId: string) {
+  const row = await getDb()
     .prepare(
       `SELECT ${customerColumns} FROM customers WHERE agency_id = ? AND id = ?`,
     )
     .get(agencyId, customerId) as CustomerRow | undefined
   if (!row) return null
-  const setups = getDb()
+  const setups = await getDb()
     .prepare(
       "SELECT id, agency_id, customer_id, token, created_at, opened_at FROM setups WHERE agency_id = ? AND customer_id = ? ORDER BY created_at ASC",
     )
     .all(agencyId, customerId) as SetupRow[]
-  return { ...toCustomer(row), setups: bundlesFor(setups) }
+  return { ...toCustomer(row), setups: await bundlesFor(setups) }
 }
 
-export function getSetupByToken(token: string) {
-  const setup = getDb()
+export async function getSetupByToken(token: string) {
+  const setup = await getDb()
     .prepare(
       "SELECT id, agency_id, customer_id, token, created_at, opened_at FROM setups WHERE token = ?",
     )
     .get(token) as SetupRow | undefined
   if (!setup) return null
-  const customer = getDb()
+  const customer = await getDb()
     .prepare(
       `SELECT ${customerColumns} FROM customers WHERE id = ? AND agency_id = ?`,
     )
     .get(setup.customer_id, setup.agency_id) as CustomerRow | undefined
-  const agency = getDb()
+  const agency = await getDb()
     .prepare(
       "SELECT id, name, email, password_hash, created_at FROM agencies WHERE id = ?",
     )
     .get(setup.agency_id) as AgencyRow | undefined
   if (!customer || !agency) return null
   return {
-    setup: bundlesFor([setup])[0],
+    setup: (await bundlesFor([setup]))[0],
     customer: toCustomer(customer),
     agency: toAgency(agency),
   }
 }
 
-export function markSetupOpened(setupId: string, agencyId: string) {
-  getDb()
+export async function markSetupOpened(setupId: string, agencyId: string) {
+  await getDb()
     .prepare(
       "UPDATE setups SET opened_at = ? WHERE id = ? AND agency_id = ? AND opened_at IS NULL",
     )
     .run(new Date().toISOString(), setupId, agencyId)
 }
 
-export function confirmStep(input: {
+export async function confirmStep(input: {
   setupId: string
   agencyId: string
   providerId: string
   stepId: string
   confirmedEmail: string
 }) {
-  const owns = getDb()
+  const owns = await getDb()
     .prepare(
       `SELECT 1 AS ok FROM setup_providers sp
        JOIN setups s ON s.id = sp.setup_id
@@ -786,7 +603,7 @@ export function confirmStep(input: {
     | undefined
   if (!owns) return { ok: false as const, error: "Dieser Anbieter gehört nicht zur Einrichtung." }
 
-  getDb()
+  await getDb()
     .prepare(
       `INSERT INTO step_confirmations (setup_id, provider_id, step_id, confirmed_email, confirmed_at)
        VALUES (?, ?, ?, ?, ?)

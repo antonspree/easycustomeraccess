@@ -4,7 +4,7 @@ import { countUnread } from "@/lib/workspace"
 
 export async function SiteHeader() {
   const session = await readSession()
-  const unread = session ? countUnread(session.member.id, session.agency.id) : 0
+  const unread = session ? await countUnread(session.member.id, session.agency.id) : 0
   return (
     <SiteHeaderClient
       session={

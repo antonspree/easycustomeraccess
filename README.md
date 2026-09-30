@@ -17,7 +17,7 @@ npm run dev
 
 Die App läuft unter [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
-Daten liegen in `data/eca.sqlite` (lokal, ohne API-Schlüssel). Der Ordner ist nicht Teil des Repos. Teammitglieder melden sich mit E-Mail und Passwort an. Es gibt keinen externen Anmeldedienst und keinen E-Mail-Versand.
+Ohne `DATABASE_URL` liegen die Daten in `data/eca.sqlite` (lokal, ohne API-Schlüssel). Der Ordner ist nicht Teil des Repos. In der Produktion auf Vercel zeigt `DATABASE_URL` auf Neon Postgres desselben Kontos. Die Verbindungszeichenfolge steht nur in den Umgebungsvariablen, nicht im Git. Teammitglieder melden sich mit E-Mail und Passwort an. Es gibt keinen externen Anmeldedienst und keinen E-Mail-Versand.
 
 ```bash
 npm test

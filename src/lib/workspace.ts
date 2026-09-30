@@ -7,21 +7,22 @@ import {
   type Member,
   type MemberRole,
 } from "@/lib/db"
+import { run, transaction } from "@/lib/query"
 
 function knownProviderIds(providerIds: string[]) {
   return [...new Set(providerIds)].filter((id) => getProvider(id))
 }
 
-export function addProvidersToSetup(input: {
+export async function addProvidersToSetup(input: {
   agencyId: string
   setupId: string
   providerIds: string[]
 }) {
-  const setup = getDb()
+  const setup = await getDb()
     .prepare("SELECT id FROM setups WHERE id = ? AND agency_id = ?")
     .get(input.setupId, input.agencyId) as { id: string } | undefined
   if (!setup) return { ok: false as const, error: "Diese Einrichtung gehört nicht zu Ihrer Agentur." }
-  const existing = getDb()
+  const existing = await getDb()
     .prepare("SELECT provider_id, position FROM setup_providers WHERE setup_id = ?")
     .all(input.setupId) as { provider_id: string; position: number }[]
   const taken = new Set(existing.map((row) => row.provider_id))
@@ -30,19 +31,21 @@ export function addProvidersToSetup(input: {
     return { ok: false as const, error: "Wählen Sie mindestens einen neuen Anbieter." }
   }
   const start = existing.reduce((max, row) => Math.max(max, row.position), -1) + 1
-  const insert = getDb().prepare(
-    "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
-  )
-  fresh.forEach((providerId, index) => insert.run(input.setupId, providerId, start + index))
+  for (const [index, providerId] of fresh.entries()) {
+    await run(
+      "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
+      [input.setupId, providerId, start + index],
+    )
+  }
   return { ok: true as const }
 }
 
-export function createAnotherSetup(input: {
+export async function createAnotherSetup(input: {
   agencyId: string
   customerId: string
   providerIds: string[]
 }) {
-  const customer = getDb()
+  const customer = await getDb()
     .prepare(
       "SELECT id FROM customers WHERE id = ? AND agency_id = ? AND archived_at IS NULL",
     )
@@ -55,49 +58,46 @@ export function createAnotherSetup(input: {
   const setupId = randomUUID()
   const now = new Date().toISOString()
   const token = randomBytes(24).toString("base64url")
-  const db = getDb()
-  db.exec("BEGIN")
-  try {
-    db.prepare(
+  await transaction(async () => {
+    await run(
       "INSERT INTO setups (id, agency_id, customer_id, token, created_at, opened_at) VALUES (?, ?, ?, ?, ?, NULL)",
-    ).run(setupId, input.agencyId, input.customerId, token, now)
-    const insert = db.prepare(
-      "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
+      [setupId, input.agencyId, input.customerId, token, now],
     )
-    known.forEach((providerId, position) => insert.run(setupId, providerId, position))
-    db.exec("COMMIT")
-  } catch (error) {
-    db.exec("ROLLBACK")
-    throw error
-  }
+    for (const [position, providerId] of known.entries()) {
+      await run(
+        "INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)",
+        [setupId, providerId, position],
+      )
+    }
+  })
   return { ok: true as const }
 }
 
-export function renameCustomer(input: { agencyId: string; customerId: string; name: string }) {
-  const result = getDb()
+export async function renameCustomer(input: { agencyId: string; customerId: string; name: string }) {
+  const result = await getDb()
     .prepare("UPDATE customers SET name = ? WHERE id = ? AND agency_id = ?")
     .run(input.name, input.customerId, input.agencyId)
   if (result.changes === 0) return { ok: false as const, error: "Kunde nicht gefunden." }
   return { ok: true as const }
 }
 
-export function setCustomerArchived(input: {
+export async function setCustomerArchived(input: {
   agencyId: string
   customerId: string
   archived: boolean
 }) {
-  getDb()
+  await getDb()
     .prepare("UPDATE customers SET archived_at = ? WHERE id = ? AND agency_id = ?")
     .run(input.archived ? new Date().toISOString() : null, input.customerId, input.agencyId)
 }
 
-export function blockStep(input: {
+export async function blockStep(input: {
   setupId: string
   providerId: string
   stepId: string
   note: string
 }) {
-  getDb()
+  await getDb()
     .prepare(
       `INSERT INTO step_blocks (setup_id, provider_id, step_id, note, created_at, resolved_at)
        VALUES (?, ?, ?, ?, ?, NULL)
@@ -107,26 +107,26 @@ export function blockStep(input: {
     .run(input.setupId, input.providerId, input.stepId, input.note, new Date().toISOString())
 }
 
-export function resolveBlock(input: { setupId: string; providerId: string; stepId: string }) {
-  getDb()
+export async function resolveBlock(input: { setupId: string; providerId: string; stepId: string }) {
+  await getDb()
     .prepare(
       "UPDATE step_blocks SET resolved_at = ? WHERE setup_id = ? AND provider_id = ? AND step_id = ? AND resolved_at IS NULL",
     )
     .run(new Date().toISOString(), input.setupId, input.providerId, input.stepId)
 }
 
-export function acceptInvitation(input: {
+export async function acceptInvitation(input: {
   setupId: string
   agencyId: string
   providerId: string
   stepId: string
   memberId: string
 }) {
-  const owns = getDb()
+  const owns = await getDb()
     .prepare("SELECT 1 AS ok FROM setups WHERE id = ? AND agency_id = ?")
     .get(input.setupId, input.agencyId) as { ok: number } | undefined
   if (!owns) return { ok: false as const, error: "Diese Einrichtung gehört nicht zu Ihrer Agentur." }
-  const confirmed = getDb()
+  const confirmed = await getDb()
     .prepare(
       "SELECT 1 AS ok FROM step_confirmations WHERE setup_id = ? AND provider_id = ? AND step_id = ?",
     )
@@ -139,7 +139,7 @@ export function acceptInvitation(input: {
   if (!step || !stepGrantsAccess(step)) {
     return { ok: false as const, error: "Dieser Schritt ist keine Einladung." }
   }
-  getDb()
+  await getDb()
     .prepare(
       `INSERT INTO invitation_checks (setup_id, provider_id, step_id, accepted_at, member_id)
        VALUES (?, ?, ?, ?, ?)
@@ -155,13 +155,13 @@ export function acceptInvitation(input: {
   return { ok: true as const }
 }
 
-export function notifyAgency(input: {
+export async function notifyAgency(input: {
   agencyId: string
   title: string
   body: string
   href?: string
 }) {
-  getDb()
+  await getDb()
     .prepare(
       "INSERT INTO notifications (id, agency_id, title, body, href, created_at) VALUES (?, ?, ?, ?, ?, ?)",
     )
@@ -175,8 +175,8 @@ export function notifyAgency(input: {
     )
 }
 
-export function listNotifications(memberId: string, agencyId: string) {
-  return getDb()
+export async function listNotifications(memberId: string, agencyId: string) {
+  return await getDb()
     .prepare(
       `SELECT n.id, n.title, n.body, n.href, n.created_at, r.read_at
        FROM notifications n
@@ -196,8 +196,8 @@ export function listNotifications(memberId: string, agencyId: string) {
   }[]
 }
 
-export function countUnread(memberId: string, agencyId: string) {
-  const row = getDb()
+export async function countUnread(memberId: string, agencyId: string) {
+  const row = await getDb()
     .prepare(
       `SELECT COUNT(*) AS n
        FROM notifications n
@@ -209,8 +209,8 @@ export function countUnread(memberId: string, agencyId: string) {
   return row.n
 }
 
-export function markNotificationsRead(memberId: string, agencyId: string) {
-  const unread = getDb()
+export async function markNotificationsRead(memberId: string, agencyId: string) {
+  const unread = await getDb()
     .prepare(
       `SELECT n.id FROM notifications n
        LEFT JOIN notification_reads r
@@ -218,15 +218,17 @@ export function markNotificationsRead(memberId: string, agencyId: string) {
        WHERE n.agency_id = ? AND r.read_at IS NULL`,
     )
     .all(memberId, agencyId) as { id: string }[]
-  const insert = getDb().prepare(
-    "INSERT INTO notification_reads (notification_id, member_id, read_at) VALUES (?, ?, ?)",
-  )
   const now = new Date().toISOString()
-  for (const item of unread) insert.run(item.id, memberId, now)
+  for (const item of unread) {
+    await run(
+      "INSERT INTO notification_reads (notification_id, member_id, read_at) VALUES (?, ?, ?)",
+      [item.id, memberId, now],
+    )
+  }
 }
 
-export function listMembers(agencyId: string) {
-  const rows = getDb()
+export async function listMembers(agencyId: string) {
+  const rows = await getDb()
     .prepare(
       "SELECT id, agency_id, name, email, password_hash, role, created_at FROM members WHERE agency_id = ? ORDER BY created_at ASC",
     )
@@ -249,8 +251,8 @@ export function listMembers(agencyId: string) {
   }))
 }
 
-export function listInvites(agencyId: string) {
-  return getDb()
+export async function listInvites(agencyId: string) {
+  return await getDb()
     .prepare(
       "SELECT token, email, role, created_at, accepted_at FROM member_invites WHERE agency_id = ? ORDER BY created_at DESC",
     )
@@ -263,22 +265,22 @@ export function listInvites(agencyId: string) {
   }[]
 }
 
-export function createMemberInvite(input: {
+export async function createMemberInvite(input: {
   agencyId: string
   email: string
   role: MemberRole
 }) {
-  if (findMemberByEmail(input.email)) {
+  if (await findMemberByEmail(input.email)) {
     return { ok: false as const, error: "Diese E-Mail ist schon vergeben." }
   }
-  const open = getDb()
+  const open = await getDb()
     .prepare(
       "SELECT token FROM member_invites WHERE agency_id = ? AND email = ? AND accepted_at IS NULL",
     )
     .get(input.agencyId, input.email) as { token: string } | undefined
   if (open) return { ok: true as const, token: open.token }
   const token = randomBytes(24).toString("base64url")
-  getDb()
+  await getDb()
     .prepare(
       "INSERT INTO member_invites (token, agency_id, email, role, created_at, accepted_at) VALUES (?, ?, ?, ?, ?, NULL)",
     )
@@ -286,16 +288,16 @@ export function createMemberInvite(input: {
   return { ok: true as const, token }
 }
 
-export function revokeInvite(agencyId: string, token: string) {
-  getDb()
+export async function revokeInvite(agencyId: string, token: string) {
+  await getDb()
     .prepare(
       "DELETE FROM member_invites WHERE agency_id = ? AND token = ? AND accepted_at IS NULL",
     )
     .run(agencyId, token)
 }
 
-export function getOpenInvite(token: string) {
-  const row = getDb()
+export async function getOpenInvite(token: string) {
+  const row = await getDb()
     .prepare(
       `SELECT i.token, i.email, i.role, i.agency_id, a.name AS agency_name
        FROM member_invites i
@@ -321,14 +323,14 @@ export function getOpenInvite(token: string) {
   }
 }
 
-export function acceptMemberInvite(input: {
+export async function acceptMemberInvite(input: {
   token: string
   name: string
   password: string
 }) {
-  const invite = getOpenInvite(input.token)
+  const invite = await getOpenInvite(input.token)
   if (!invite) return { ok: false as const, error: "Diese Einladung ist nicht mehr gültig." }
-  if (findMemberByEmail(invite.email)) {
+  if (await findMemberByEmail(invite.email)) {
     return { ok: false as const, error: "Diese E-Mail ist schon vergeben." }
   }
   const now = new Date().toISOString()
@@ -340,90 +342,82 @@ export function acceptMemberInvite(input: {
     role: invite.role,
     createdAt: now,
   }
-  const db = getDb()
-  db.exec("BEGIN")
-  try {
-    db.prepare(
+  await transaction(async () => {
+    await run(
       "INSERT INTO members (id, agency_id, name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    ).run(
-      member.id,
-      member.agencyId,
-      member.name,
-      member.email,
-      hashPassword(input.password),
-      member.role,
-      member.createdAt,
+      [
+        member.id,
+        member.agencyId,
+        member.name,
+        member.email,
+        hashPassword(input.password),
+        member.role,
+        member.createdAt,
+      ],
     )
-    db.prepare("UPDATE member_invites SET accepted_at = ? WHERE token = ?").run(now, input.token)
-    db.exec("COMMIT")
-  } catch (error) {
-    db.exec("ROLLBACK")
-    throw error
-  }
+    await run("UPDATE member_invites SET accepted_at = ? WHERE token = ?", [now, input.token])
+  })
   return { ok: true as const, member }
 }
 
-export function removeMember(input: { agencyId: string; memberId: string; actorId: string }) {
+export async function removeMember(input: { agencyId: string; memberId: string; actorId: string }) {
   if (input.memberId === input.actorId) {
     return { ok: false as const, error: "Sie können sich nicht selbst entfernen." }
   }
-  const target = getDb()
+  const target = await getDb()
     .prepare("SELECT role FROM members WHERE id = ? AND agency_id = ?")
     .get(input.memberId, input.agencyId) as { role: string } | undefined
   if (!target) return { ok: false as const, error: "Person nicht gefunden." }
   if (target.role === "inhaber") {
-    const owners = getDb()
+    const owners = await getDb()
       .prepare("SELECT COUNT(*) AS n FROM members WHERE agency_id = ? AND role = 'inhaber'")
       .get(input.agencyId) as { n: number }
     if (owners.n <= 1) {
       return { ok: false as const, error: "Die letzte Inhaberin oder der letzte Inhaber bleibt." }
     }
   }
-  const db = getDb()
-  db.exec("BEGIN")
-  try {
-    db.prepare("UPDATE invitation_checks SET member_id = ? WHERE member_id = ?").run(
+  await transaction(async () => {
+    await run("UPDATE invitation_checks SET member_id = ? WHERE member_id = ?", [
       input.actorId,
       input.memberId,
-    )
-    db.prepare("DELETE FROM notification_reads WHERE member_id = ?").run(input.memberId)
-    db.prepare("DELETE FROM sessions WHERE member_id = ?").run(input.memberId)
-    db.prepare("DELETE FROM members WHERE id = ? AND agency_id = ?").run(input.memberId, input.agencyId)
-    db.exec("COMMIT")
-  } catch (error) {
-    db.exec("ROLLBACK")
-    throw error
-  }
+    ])
+    await run("DELETE FROM notification_reads WHERE member_id = ?", [input.memberId])
+    await run("DELETE FROM sessions WHERE member_id = ?", [input.memberId])
+    await run("DELETE FROM members WHERE id = ? AND agency_id = ?", [
+      input.memberId,
+      input.agencyId,
+    ])
+  })
   return { ok: true as const }
 }
 
-export function changePassword(input: {
+export async function changePassword(input: {
   memberId: string
   currentPassword: string
   nextPassword: string
 }) {
-  const row = getDb()
+  const row = await getDb()
     .prepare("SELECT password_hash FROM members WHERE id = ?")
     .get(input.memberId) as { password_hash: string } | undefined
   if (!row || !verifyPassword(input.currentPassword, row.password_hash)) {
     return { ok: false as const, error: "Das aktuelle Passwort stimmt nicht." }
   }
-  getDb()
+  await getDb()
     .prepare("UPDATE members SET password_hash = ? WHERE id = ?")
     .run(hashPassword(input.nextPassword), input.memberId)
   return { ok: true as const }
 }
 
-export function updateAgencyProfile(input: {
+export async function updateAgencyProfile(input: {
   agencyId: string
   name: string
   email: string
 }) {
-  const taken = getDb()
+  const taken = await getDb()
     .prepare("SELECT id FROM agencies WHERE email = ? AND id <> ?")
     .get(input.email, input.agencyId) as { id: string } | undefined
   if (taken) return { ok: false as const, error: "Diese Einladungsadresse ist schon vergeben." }
-  getDb()
+  await getDb()
     .prepare("UPDATE agencies SET name = ?, email = ? WHERE id = ?")
     .run(input.name, input.email, input.agencyId)
   return { ok: true as const }

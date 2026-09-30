@@ -2,10 +2,18 @@ import Link from "next/link"
 
 export function SiteFooter() {
   return (
-    <footer className="border-t">
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-4 text-sm text-muted-foreground">
-        <p>EasyCustomerAccess führt durch Einrichtungen und speichert Bestätigungen lokal.</p>
-        <Link href="/datenschutz" className="underline-offset-4 hover:underline">
+    <footer className="border-t bg-card">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="flex items-center gap-2 font-heading text-lg">
+            <span aria-hidden className="size-2.5 rounded-full bg-primary" />
+            EasyCustomerAccess
+          </p>
+          <p className="max-w-md text-sm text-foreground/75">
+            Agenturen führen Kundinnen und Kunden durch Konten, die auf deren Namen laufen. Bestätigungen bleiben in der App.
+          </p>
+        </div>
+        <Link href="/datenschutz" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
           Datenschutz
         </Link>
       </div>

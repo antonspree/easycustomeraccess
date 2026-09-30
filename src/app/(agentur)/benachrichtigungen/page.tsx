@@ -17,8 +17,8 @@ export const dynamic = "force-dynamic"
 
 export default async function NotificationsPage() {
   const { agency, member } = await requireSession()
-  const items = listNotifications(member.id, agency.id)
-  markNotificationsRead(member.id, agency.id)
+  const items = await listNotifications(member.id, agency.id)
+  await markNotificationsRead(member.id, agency.id)
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">

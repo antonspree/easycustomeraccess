@@ -77,13 +77,13 @@ export async function registerAction(
     return { error: "Die Passwörter stimmen nicht überein." }
   }
 
-  const created = createAgency({
+  const created = await createAgency({
     name: agencyName.name,
     email,
     password,
   })
   if (!created.ok) return { error: created.error }
-  const session = createSession(created.member.id, created.agency.id)
+  const session = await createSession(created.member.id, created.agency.id)
   await setSessionCookie(session.token)
   redirect("/uebersicht")
 }
@@ -94,9 +94,9 @@ export async function loginAction(
 ): Promise<FormState> {
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   const password = String(formData.get("password") ?? "")
-  const found = authenticateMember(email, password)
+  const found = await authenticateMember(email, password)
   if (!found) return { error: "E-Mail oder Passwort ist nicht richtig." }
-  const session = createSession(found.member.id, found.agency.id)
+  const session = await createSession(found.member.id, found.agency.id)
   await setSessionCookie(session.token)
   redirect("/uebersicht")
 }
@@ -118,7 +118,7 @@ export async function createSetupAction(
     return { error: "Bitte eine gültige E-Mail-Adresse des Kunden eintragen." }
   }
   const providerIds = formData.getAll("providerId").map(String)
-  const created = createCustomerWithSetup({
+  const created = await createCustomerWithSetup({
     agencyId: agency.id,
     name: customerName.name,
     email,
@@ -136,7 +136,7 @@ export async function confirmStepAction(
   const token = String(formData.get("token") ?? "")
   const providerId = String(formData.get("providerId") ?? "")
   const stepId = String(formData.get("stepId") ?? "")
-  const loaded = getSetupByToken(token)
+  const loaded = await getSetupByToken(token)
   if (!loaded) return { error: "Dieser Link ist ungültig." }
 
   const next = findNextStep({ providers: loaded.setup.providers })
@@ -144,7 +144,7 @@ export async function confirmStepAction(
     return { error: "Dieser Schritt ist gerade nicht an der Reihe." }
   }
 
-  const saved = confirmStep({
+  const saved = await confirmStep({
     setupId: loaded.setup.id,
     agencyId: loaded.setup.agencyId,
     providerId,
@@ -153,11 +153,11 @@ export async function confirmStepAction(
   })
   if (!saved.ok) return { error: saved.error }
 
-  resolveBlock({ setupId: loaded.setup.id, providerId, stepId })
+  await resolveBlock({ setupId: loaded.setup.id, providerId, stepId })
 
   const definition = getProvider(providerId)
   const providerName = definition?.name ?? providerId
-  notifyAgency({
+  await notifyAgency({
     agencyId: loaded.setup.agencyId,
     title: `${loaded.customer.name}: Schritt bestätigt`,
     body: `${providerName}: ${next.step.title}. Bestätigt als ${loaded.customer.email}.`,
@@ -178,7 +178,7 @@ export async function confirmStepAction(
     ],
   })
   if (progress.status === "fertig") {
-    notifyAgency({
+    await notifyAgency({
       agencyId: loaded.setup.agencyId,
       title: `${loaded.customer.name}: ${providerName} ist fertig`,
       body: `Alle Schritte sind mit ${loaded.customer.email} bestätigt.`,
@@ -215,20 +215,20 @@ export async function blockStepAction(
   }
   if (note.length > 500) return { error: "Die Notiz ist zu lang." }
 
-  const loaded = getSetupByToken(token)
+  const loaded = await getSetupByToken(token)
   if (!loaded) return { error: "Dieser Link ist ungültig." }
   const next = findNextStep({ providers: loaded.setup.providers })
   if (!next || next.definition.id !== providerId || next.step.id !== stepId) {
     return { error: "Dieser Schritt ist gerade nicht an der Reihe." }
   }
 
-  blockStep({
+  await blockStep({
     setupId: loaded.setup.id,
     providerId,
     stepId,
     note,
   })
-  notifyAgency({
+  await notifyAgency({
     agencyId: loaded.setup.agencyId,
     title: `${loaded.customer.name} kommt nicht weiter`,
     body: `${next.definition.name}, ${next.step.title}: ${note}`,
@@ -249,7 +249,7 @@ export async function renameCustomerAction(
   const customerId = String(formData.get("customerId") ?? "")
   const name = cleanName(formData.get("name"), "Der Name", 120)
   if (!name.ok) return { error: name.error }
-  const saved = renameCustomer({ agencyId: agency.id, customerId, name: name.name })
+  const saved = await renameCustomer({ agencyId: agency.id, customerId, name: name.name })
   if (!saved.ok) return { error: saved.error }
   revalidatePath(`/kunden/${customerId}`)
   revalidatePath("/uebersicht")
@@ -262,7 +262,7 @@ export async function archiveCustomerAction(formData: FormData) {
   if (denied) redirect("/uebersicht")
   const customerId = String(formData.get("customerId") ?? "")
   const archived = String(formData.get("archived") ?? "") === "1"
-  setCustomerArchived({ agencyId: agency.id, customerId, archived })
+  await setCustomerArchived({ agencyId: agency.id, customerId, archived })
   revalidatePath("/uebersicht")
   revalidatePath(`/kunden/${customerId}`)
   redirect(archived ? "/uebersicht?archiv=1" : `/kunden/${customerId}`)
@@ -275,11 +275,11 @@ export async function addProvidersAction(
   const { agency } = await requireSession()
   const setupId = String(formData.get("setupId") ?? "")
   const customerId = String(formData.get("customerId") ?? "")
-  const customer = getCustomerForAgency(agency.id, customerId)
+  const customer = await getCustomerForAgency(agency.id, customerId)
   if (!customer || customer.archivedAt || !customer.setups.some((setup) => setup.id === setupId)) {
     return { error: "Diese Einrichtung lässt sich nicht erweitern." }
   }
-  const saved = addProvidersToSetup({
+  const saved = await addProvidersToSetup({
     agencyId: agency.id,
     setupId,
     providerIds: formData.getAll("providerId").map(String),
@@ -296,7 +296,7 @@ export async function anotherSetupAction(
 ): Promise<FormState> {
   const { agency } = await requireSession()
   const customerId = String(formData.get("customerId") ?? "")
-  const saved = createAnotherSetup({
+  const saved = await createAnotherSetup({
     agencyId: agency.id,
     customerId,
     providerIds: formData.getAll("providerId").map(String),
@@ -313,7 +313,7 @@ export async function acceptInvitationAction(
 ): Promise<FormState> {
   const { agency, member } = await requireSession()
   const customerId = String(formData.get("customerId") ?? "")
-  const saved = acceptInvitation({
+  const saved = await acceptInvitation({
     setupId: String(formData.get("setupId") ?? ""),
     agencyId: agency.id,
     providerId: String(formData.get("providerId") ?? ""),
@@ -330,9 +330,9 @@ export async function resolveBlockAction(formData: FormData) {
   const { agency } = await requireSession()
   const customerId = String(formData.get("customerId") ?? "")
   const setupId = String(formData.get("setupId") ?? "")
-  const customer = getCustomerForAgency(agency.id, customerId)
+  const customer = await getCustomerForAgency(agency.id, customerId)
   if (!customer?.setups.some((setup) => setup.id === setupId)) redirect("/uebersicht")
-  resolveBlock({
+  await resolveBlock({
     setupId,
     providerId: String(formData.get("providerId") ?? ""),
     stepId: String(formData.get("stepId") ?? ""),
@@ -351,7 +351,7 @@ export async function inviteMemberAction(
   if (denied) return { error: denied }
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   if (!isEmail(email)) return { error: "Bitte eine gültige E-Mail-Adresse eintragen." }
-  const created = createMemberInvite({
+  const created = await createMemberInvite({
     agencyId: agency.id,
     email,
     role: "mitarbeiter",
@@ -364,7 +364,7 @@ export async function inviteMemberAction(
 export async function revokeInviteAction(formData: FormData) {
   const { agency, member } = await requireSession()
   if (ownerGuard(member.role)) redirect("/team")
-  revokeInvite(agency.id, String(formData.get("token") ?? ""))
+  await revokeInvite(agency.id, String(formData.get("token") ?? ""))
   revalidatePath("/team")
   redirect("/team")
 }
@@ -372,7 +372,7 @@ export async function revokeInviteAction(formData: FormData) {
 export async function removeMemberAction(formData: FormData) {
   const { agency, member } = await requireSession()
   if (ownerGuard(member.role)) redirect("/team")
-  removeMember({
+  await removeMember({
     agencyId: agency.id,
     memberId: String(formData.get("memberId") ?? ""),
     actorId: member.id,
@@ -396,15 +396,15 @@ export async function acceptTeamInviteAction(
     return { error: "Die Passwörter stimmen nicht überein." }
   }
   const token = String(formData.get("token") ?? "")
-  const accepted = acceptMemberInvite({ token, name: name.name, password })
+  const accepted = await acceptMemberInvite({ token, name: name.name, password })
   if (!accepted.ok) return { error: accepted.error }
-  notifyAgency({
+  await notifyAgency({
     agencyId: accepted.member.agencyId,
     title: `${accepted.member.name} ist im Team`,
     body: `${accepted.member.email} hat die Einladung angenommen.`,
     href: "/team",
   })
-  const session = createSession(accepted.member.id, accepted.member.agencyId)
+  const session = await createSession(accepted.member.id, accepted.member.agencyId)
   await setSessionCookie(session.token)
   revalidatePath("/team")
   revalidatePath("/benachrichtigungen")
@@ -425,7 +425,7 @@ export async function changePasswordAction(
   if (nextPassword !== again) {
     return { error: "Die Passwörter stimmen nicht überein." }
   }
-  const saved = changePassword({
+  const saved = await changePassword({
     memberId: member.id,
     currentPassword,
     nextPassword,
@@ -445,7 +445,7 @@ export async function updateAgencyProfileAction(
   if (!name.ok) return { error: name.error }
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   if (!isEmail(email)) return { error: "Bitte eine gültige Einladungsadresse eintragen." }
-  const saved = updateAgencyProfile({ agencyId: agency.id, name: name.name, email })
+  const saved = await updateAgencyProfile({ agencyId: agency.id, name: name.name, email })
   if (!saved.ok) return { error: saved.error }
   revalidatePath("/agentur")
   revalidatePath("/uebersicht")

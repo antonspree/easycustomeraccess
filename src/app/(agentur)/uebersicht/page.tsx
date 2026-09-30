@@ -32,7 +32,7 @@ export default async function OverviewPage({
   const params = await searchParams
   const archived = params.archiv === "1"
   const query = (params.q ?? "").trim().toLowerCase()
-  const customers = listCustomersForAgency(agency.id, archived).filter((customer) => {
+  const customers = (await listCustomersForAgency(agency.id, archived)).filter((customer) => {
     if (!query) return true
     return (
       customer.name.toLowerCase().includes(query) ||

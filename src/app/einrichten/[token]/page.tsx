@@ -26,7 +26,7 @@ export default async function CustomerSetupPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
-  const loaded = getSetupByToken(token)
+  const loaded = await getSetupByToken(token)
 
   if (!loaded) {
     return (
@@ -44,7 +44,7 @@ export default async function CustomerSetupPage({
   }
 
   if (!loaded.setup.openedAt) {
-    markSetupOpened(loaded.setup.id, loaded.setup.agencyId)
+    await markSetupOpened(loaded.setup.id, loaded.setup.agencyId)
   }
   const { setup, customer, agency } = loaded
   const vars = {

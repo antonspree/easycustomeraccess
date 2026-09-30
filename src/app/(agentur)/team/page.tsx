@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic"
 
 export default async function TeamPage() {
   const { agency, member } = await requireSession()
-  const people = listMembers(agency.id)
-  const invites = listInvites(agency.id).filter((invite) => !invite.accepted_at)
+  const people = await listMembers(agency.id)
+  const invites = (await listInvites(agency.id)).filter((invite) => !invite.accepted_at)
   const origin = await publicOrigin()
   const owner = member.role === "inhaber"
 

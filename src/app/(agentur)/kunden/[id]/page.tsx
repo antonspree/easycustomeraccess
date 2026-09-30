@@ -28,7 +28,7 @@ export default async function CustomerPage({
 }) {
   const { id } = await params
   const { agency, member } = await requireSession()
-  const customer = getCustomerForAgency(agency.id, id)
+  const customer = await getCustomerForAgency(agency.id, id)
   if (!customer) {
     return (
       <main className="mx-auto flex w-full max-w-3xl px-4 py-8">

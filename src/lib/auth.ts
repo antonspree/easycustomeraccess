@@ -10,7 +10,7 @@ export async function readSession() {
   const jar = await cookies()
   const token = jar.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return getSession(token)
+  return await getSession(token)
 }
 
 export async function requireSession() {
@@ -33,6 +33,6 @@ export async function setSessionCookie(token: string) {
 export async function clearSessionCookie() {
   const jar = await cookies()
   const token = jar.get(SESSION_COOKIE)?.value
-  if (token) deleteSession(token)
+  if (token) await deleteSession(token)
   jar.delete(SESSION_COOKIE)
 }

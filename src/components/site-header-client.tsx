@@ -5,6 +5,16 @@ import { usePathname } from "next/navigation"
 import { BellIcon } from "lucide-react"
 import { logoutAction } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+function Wordmark({ href }: { href: string }) {
+  return (
+    <Link href={href} className="flex items-center gap-2 font-heading text-lg leading-none">
+      <span aria-hidden className="size-2.5 rounded-full bg-primary" />
+      EasyCustomerAccess
+    </Link>
+  )
+}
 
 export function SiteHeaderClient({
   session,
@@ -18,8 +28,8 @@ export function SiteHeaderClient({
     return (
       <header className="border-b bg-card">
         <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3">
-          <p className="font-heading text-lg leading-none">EasyCustomerAccess</p>
-          <p className="text-sm text-muted-foreground">Einrichtung</p>
+          <Wordmark href="/" />
+          <p className="text-sm text-primary">Einrichtung</p>
           {session ? (
             <Button className="ml-auto" variant="outline" size="sm" render={<Link href="/uebersicht" />}>
               Zur Übersicht
@@ -30,27 +40,39 @@ export function SiteHeaderClient({
     )
   }
 
+  const links = [
+    { href: "/uebersicht", label: "Übersicht" },
+    { href: "/kunden/neu", label: "Neuer Kunde" },
+    { href: "/team", label: "Team" },
+    { href: "/agentur", label: "Agentur" },
+  ]
+
   return (
     <header className="border-b bg-card">
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-        <Link href={session ? "/uebersicht" : "/"} className="font-heading text-lg leading-none">
-          EasyCustomerAccess
-        </Link>
+        <Wordmark href={session ? "/uebersicht" : "/"} />
         {session ? (
           <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <Button variant="ghost" size="sm" render={<Link href="/uebersicht" />}>
-              Übersicht
-            </Button>
-            <Button variant="ghost" size="sm" render={<Link href="/kunden/neu" />}>
-              Neuer Kunde
-            </Button>
-            <Button variant="ghost" size="sm" render={<Link href="/team" />}>
-              Team
-            </Button>
-            <Button variant="ghost" size="sm" render={<Link href="/agentur" />}>
-              Agentur
-            </Button>
-            <Button variant="ghost" size="sm" render={<Link href="/benachrichtigungen" />}>
+            {links.map((link) => {
+              const active = pathname === link.href || pathname.startsWith(`${link.href}/`)
+              return (
+                <Button
+                  key={link.href}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(active && "text-primary")}
+                  render={<Link href={link.href} />}
+                >
+                  {link.label}
+                </Button>
+              )
+            })}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(pathname.startsWith("/benachrichtigungen") && "text-primary")}
+              render={<Link href="/benachrichtigungen" />}
+            >
               <BellIcon data-icon="inline-start" />
               Hinweise
               {session.unread > 0 ? (
@@ -59,7 +81,7 @@ export function SiteHeaderClient({
                 </span>
               ) : null}
             </Button>
-            <p className="text-sm text-muted-foreground sm:ml-auto">
+            <p className="text-sm text-foreground/70 sm:ml-auto">
               {session.memberName} · {session.agencyName}
             </p>
             <form action={logoutAction}>

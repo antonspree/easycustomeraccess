@@ -18,7 +18,7 @@ export default async function JoinPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
-  const invite = getOpenInvite(token)
+  const invite = await getOpenInvite(token)
 
   if (!invite) {
     return (

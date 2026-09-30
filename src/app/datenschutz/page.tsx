@@ -15,7 +15,7 @@ export default function PrivacyPage() {
           Agenturname, Einladungsadresse, Namen und E-Mails der Teammitglieder, Passwort-Prüfsummen (scrypt), Kundennamen und Kunden-E-Mails, gewählte Anbieter, bestätigte Schritte mit Zeitpunkt, Hinweise wenn jemand nicht weiterkommt, ob eine Einladung im Postfach als angenommen markiert wurde, und Hinweise in der App.
         </p>
         <p>
-          Die Datei liegt lokal unter <span className="font-medium">data/eca.sqlite</span>. Es gibt keinen externen Anmeldedienst, keine Anbieter-API und keinen Versand von E-Mails aus der App.
+          Lokal ohne Datenbank-Adresse liegt das in der Datei data/eca.sqlite. In der Produktion liegt es in Neon Postgres, angebunden über dasselbe Vercel-Konto. Die Verbindung steht nur in der Umgebung des Hosts. Es gibt keinen externen Anmeldedienst, keine Anbieter-API und keinen Versand von E-Mails aus der App.
         </p>
       </section>
       <section className="flex flex-col gap-2">
