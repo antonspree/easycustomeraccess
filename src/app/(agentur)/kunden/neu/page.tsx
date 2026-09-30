@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
 import { CreateSetupForm } from "@/components/create-setup-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { requireAgency } from "@/lib/auth"
+import { requireSession } from "@/lib/auth"
 
 export const metadata: Metadata = { title: "Neuer Kunde" }
 
 export default async function NewCustomerPage() {
-  const agency = await requireAgency()
+  const { agency } = await requireSession()
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">

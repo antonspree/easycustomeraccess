@@ -1,22 +1,13 @@
 import type { Metadata } from "next"
-import { Fraunces, Geist_Mono, Source_Sans_3 } from "next/font/google"
+import { Source_Sans_3 } from "next/font/google"
 import { Providers } from "@/components/providers"
+import { SiteFooter } from "@/components/site-footer"
 import { SiteHeader } from "@/components/site-header"
 import "./globals.css"
 
 const sans = Source_Sans_3({
   subsets: ["latin"],
   variable: "--font-source",
-})
-
-const heading = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-})
-
-const mono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
 })
 
 export const metadata: Metadata = {
@@ -32,12 +23,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
-      className={`${sans.variable} ${heading.variable} ${mono.variable} h-full antialiased`}
+      className={`${sans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <Providers>
           <SiteHeader />
           <div className="flex flex-1 flex-col">{children}</div>
+          <SiteFooter />
         </Providers>
       </body>
     </html>

@@ -630,3 +630,9 @@ export function listCategories() {
   }
   return categories
 }
+
+const accessStepIds = new Set(["einladung", "benutzer"])
+
+export function stepGrantsAccess(step: { id: string; grantsAccess?: boolean }) {
+  return step.grantsAccess === true || accessStepIds.has(step.id)
+}

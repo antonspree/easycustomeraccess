@@ -36,7 +36,9 @@ export function RegisterForm() {
         <Field>
           <FieldLabel htmlFor="email">E-Mail der Agentur</FieldLabel>
           <Input id="email" name="email" type="email" autoComplete="email" required />
-          <FieldDescription>Mit dieser Adresse laden Kunden Sie als Mitglied ein.</FieldDescription>
+          <FieldDescription>
+            Damit melden Sie sich an. Dieselbe Adresse laden Kundinnen und Kunden bei den Anbietern ein. Später kann die Einladungsadresse in den Agentur-Einstellungen abweichen.
+          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Passwort</FieldLabel>

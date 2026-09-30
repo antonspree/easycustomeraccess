@@ -1,22 +1,22 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { deleteSession, getAgencyBySession } from "@/lib/db"
+import { deleteSession, getSession } from "@/lib/db"
 
 export const SESSION_COOKIE = "eca_session"
 
 const fourteenDays = 60 * 60 * 24 * 14
 
-export async function readAgency() {
+export async function readSession() {
   const jar = await cookies()
   const token = jar.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return getAgencyBySession(token)
+  return getSession(token)
 }
 
-export async function requireAgency() {
-  const agency = await readAgency()
-  if (!agency) redirect("/anmelden")
-  return agency
+export async function requireSession() {
+  const session = await readSession()
+  if (!session) redirect("/anmelden")
+  return session
 }
 
 export async function setSessionCookie(token: string) {

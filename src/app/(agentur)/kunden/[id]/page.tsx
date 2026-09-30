@@ -1,8 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { AddProvidersForm, AnotherSetupForm, RenameCustomerForm } from "@/components/agency-forms"
 import { RefreshButton } from "@/components/refresh-button"
 import { SetupDetail } from "@/components/setup-detail"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
   EmptyContent,
@@ -10,7 +13,8 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { requireAgency } from "@/lib/auth"
+import { archiveCustomerAction } from "@/lib/actions"
+import { requireSession } from "@/lib/auth"
 import { getCustomerForAgency } from "@/lib/db"
 import { publicOrigin } from "@/lib/origin"
 
@@ -23,7 +27,7 @@ export default async function CustomerPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const agency = await requireAgency()
+  const { agency, member } = await requireSession()
   const customer = getCustomerForAgency(agency.id, id)
   if (!customer) {
     return (
@@ -43,6 +47,13 @@ export default async function CustomerPage({
     )
   }
   const origin = await publicOrigin()
+  const vars = {
+    customerEmail: customer.email,
+    customerName: customer.name,
+    agencyEmail: agency.email,
+    agencyName: agency.name,
+  }
+  const owner = member.role === "inhaber"
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
@@ -58,19 +69,77 @@ export default async function CustomerPage({
           </Button>
         </div>
       </div>
-      {customer.setups.map((setup) => (
-        <SetupDetail
-          key={setup.id}
-          setup={setup}
-          origin={origin}
-          vars={{
-            customerEmail: customer.email,
-            customerName: customer.name,
-            agencyEmail: agency.email,
-            agencyName: agency.name,
-          }}
-        />
+
+      {customer.archivedAt ? (
+        <Alert>
+          <AlertTitle>Im Archiv</AlertTitle>
+          <AlertDescription>
+            Neue Einrichtungen und Anbieter sind pausiert. Der bestehende Link bleibt gültig.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Kunde</CardTitle>
+          <CardDescription>
+            Die E-Mail bleibt die Adresse, mit der die Schritte bestätigt werden.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <RenameCustomerForm customerId={customer.id} name={customer.name} />
+          {owner ? (
+            <form action={archiveCustomerAction}>
+              <input type="hidden" name="customerId" value={customer.id} />
+              <input type="hidden" name="archived" value={customer.archivedAt ? "0" : "1"} />
+              <Button type="submit" variant="outline">
+                {customer.archivedAt ? "Wiederherstellen" : "Archivieren"}
+              </Button>
+            </form>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Archivieren kann die Inhaberin oder der Inhaber.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {customer.setups.map((setup, index) => (
+        <div key={setup.id} className="flex flex-col gap-4">
+          <SetupDetail setup={setup} origin={origin} customerId={customer.id} vars={vars} />
+          {!customer.archivedAt ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Anbieter ergänzen</CardTitle>
+                <CardDescription>
+                  Einrichtung {index + 1}. Der bisherige Link deckt die neuen Schritte mit ab.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AddProvidersForm
+                  setupId={setup.id}
+                  customerId={customer.id}
+                  excludeIds={setup.providers.map((provider) => provider.providerId)}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
       ))}
+
+      {!customer.archivedAt ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Weitere Einrichtung</CardTitle>
+            <CardDescription>
+              Ein eigener Link, wenn später ein zweites Projekt dazukommt.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AnotherSetupForm customerId={customer.id} />
+          </CardContent>
+        </Card>
+      ) : null}
     </main>
   )
 }

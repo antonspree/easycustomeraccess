@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { ExternalLinkIcon } from "lucide-react"
 import { ConfirmStepForm } from "@/components/confirm-step-form"
+import { StuckForm } from "@/components/stuck-form"
 import { StatusBadge } from "@/components/status-badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -126,6 +127,27 @@ export default async function CustomerSetupPage({
                 <ExternalLinkIcon data-icon="inline-end" />
               </Button>
             ) : null}
+            {setup.blocks.some(
+              (block) =>
+                !block.resolvedAt &&
+                block.providerId === next.definition.id &&
+                block.stepId === next.step.id,
+            ) ? (
+              <Alert>
+                <AlertTitle>Hinweis ist bei der Agentur</AlertTitle>
+                <AlertDescription>
+                  {
+                    setup.blocks.find(
+                      (block) =>
+                        !block.resolvedAt &&
+                        block.providerId === next.definition.id &&
+                        block.stepId === next.step.id,
+                    )?.note
+                  }
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            <StuckForm token={token} providerId={next.definition.id} stepId={next.step.id} />
             <div className="sticky bottom-0 border-t bg-card py-3">
               <ConfirmStepForm
                 token={token}

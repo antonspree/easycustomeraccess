@@ -1,10 +1,10 @@
-import { requireAgency } from "@/lib/auth"
+import { requireSession } from "@/lib/auth"
 
 export default async function AgencyLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  await requireAgency()
+  await requireSession()
   return children
 }

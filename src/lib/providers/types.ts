@@ -11,6 +11,8 @@ export type ProviderStep = {
   doneMeans: string
   href?: string
   hrefLabel?: string
+  /** Der Kunde vergibt hier der Agentur eine Rolle. Die Agentur bestätigt später die Annahme. */
+  grantsAccess?: boolean
 }
 
 export type ProviderDefinition = {

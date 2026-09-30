@@ -45,6 +45,10 @@ export function registerAdapter(adapter: ProviderAdapter) {
   adapters.set(adapter.id, adapter)
 }
 
+export function listAdapters() {
+  return [...adapters.values()]
+}
+
 export function getAdapter(adapterId: string): ProviderAdapter {
   const adapter = adapters.get(adapterId)
   if (!adapter) {
