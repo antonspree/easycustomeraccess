@@ -31,7 +31,15 @@ export default async function AgencySettingsPage() {
         </CardHeader>
         <CardContent>
           {owner ? (
-            <AgencyProfileForm name={agency.name} email={agency.email} />
+            <AgencyProfileForm
+              name={agency.name}
+              email={agency.email}
+              logoUrl={agency.logoUrl}
+              bannerUrl={agency.bannerUrl}
+              brandAccent={agency.brandAccent}
+              brandBackground={agency.brandBackground}
+              brandText={agency.brandText}
+            />
           ) : (
             <div className="flex flex-col gap-1 text-sm">
               <p>{agency.name}</p>

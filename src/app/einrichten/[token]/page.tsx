@@ -13,8 +13,11 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress"
+import { readSession } from "@/lib/auth"
+import { contrastOn } from "@/lib/brand"
 import { getSetupByToken, markSetupOpened } from "@/lib/db"
 import { findNextStep, setupProgress } from "@/lib/providers/status"
+import { stepGuidePath } from "@/lib/step-guide"
 import { fillTemplate } from "@/lib/text"
 
 export const metadata: Metadata = { title: "Einrichtung" }
@@ -57,10 +60,51 @@ export default async function CustomerSetupPage({
   const progress = setupProgress({ opened, providers: setup.providers })
   const next = findNextStep({ providers: setup.providers })
   const percent = progress.total === 0 ? 0 : Math.round((progress.confirmed / progress.total) * 100)
+  const guide = next ? stepGuidePath(next.definition.id, next.step.id) : null
+  const session = await readSession()
+  const onAccent = contrastOn(agency.brandAccent)
+  const brandStyle = {
+    backgroundColor: agency.brandBackground,
+    color: agency.brandText,
+    "--background": agency.brandBackground,
+    "--foreground": agency.brandText,
+    "--card": agency.brandBackground,
+    "--card-foreground": agency.brandText,
+    "--popover": agency.brandBackground,
+    "--popover-foreground": agency.brandText,
+    "--primary": agency.brandAccent,
+    "--primary-foreground": onAccent,
+    "--secondary": `color-mix(in srgb, ${agency.brandAccent} 18%, ${agency.brandBackground})`,
+    "--secondary-foreground": agency.brandText,
+    "--muted": `color-mix(in srgb, ${agency.brandAccent} 12%, ${agency.brandBackground})`,
+    "--muted-foreground": `color-mix(in srgb, ${agency.brandText} 72%, transparent)`,
+    "--accent": `color-mix(in srgb, ${agency.brandAccent} 18%, ${agency.brandBackground})`,
+    "--accent-foreground": agency.brandText,
+    "--border": `color-mix(in srgb, ${agency.brandText} 22%, transparent)`,
+    "--input": `color-mix(in srgb, ${agency.brandText} 28%, transparent)`,
+    "--ring": agency.brandAccent,
+  } as React.CSSProperties
 
   return (
+    <div className="min-h-svh" style={brandStyle}>
+      {agency.bannerUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={agency.bannerUrl} alt="" className="h-36 w-full object-cover sm:h-48" />
+      ) : null}
     <main className="mx-auto flex w-full max-w-xl flex-col gap-4 px-4 py-6 sm:py-10">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          {agency.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={agency.logoUrl} alt="" className="size-12 rounded-md border object-contain" />
+          ) : null}
+          <p className="font-heading text-lg">{agency.name}</p>
+          {session?.agency.id === agency.id ? (
+            <Button className="ml-auto" variant="outline" size="sm" render={<a href="/uebersicht" />}>
+              Zur Übersicht
+            </Button>
+          ) : null}
+        </div>
         <p className="text-sm text-muted-foreground">Einrichtung für {customer.name}</p>
         <h1 className="font-heading text-3xl">Konten auf Ihren Namen</h1>
         <p className="text-sm text-muted-foreground">
@@ -98,9 +142,19 @@ export default async function CustomerSetupPage({
               <AlertDescription>{customer.email}</AlertDescription>
             </Alert>
             <dl className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <dt className="text-sm font-medium">Was Sie tun</dt>
-                <dd className="text-muted-foreground">{fillTemplate(next.step.instruction, vars)}</dd>
+                <dd className="flex flex-col gap-3 text-muted-foreground sm:flex-row sm:items-start">
+                  <span className="min-w-0 flex-1">{fillTemplate(next.step.instruction, vars)}</span>
+                  {guide ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={guide}
+                      alt={`Aufnahme: ${next.step.title}`}
+                      className="w-full shrink-0 rounded-lg border sm:w-60"
+                    />
+                  ) : null}
+                </dd>
               </div>
               <div className="flex flex-col gap-1">
                 <dt className="text-sm font-medium">Welche E-Mail</dt>
@@ -174,5 +228,6 @@ export default async function CustomerSetupPage({
         </Card>
       )}
     </main>
+    </div>
   )
 }

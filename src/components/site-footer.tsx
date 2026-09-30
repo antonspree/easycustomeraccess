@@ -12,7 +12,9 @@ export function SiteFooter() {
     pathname.startsWith("/kunden") ||
     pathname.startsWith("/team") ||
     pathname.startsWith("/agentur") ||
-    pathname.startsWith("/benachrichtigungen")
+    pathname.startsWith("/benachrichtigungen") ||
+    pathname.startsWith("/einrichten") ||
+    pathname.startsWith("/verwaltung")
   if (ownChrome) return null
 
   return (

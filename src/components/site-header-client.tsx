@@ -29,26 +29,10 @@ export function SiteHeaderClient({
     pathname.startsWith("/kunden") ||
     pathname.startsWith("/team") ||
     pathname.startsWith("/agentur") ||
-    pathname.startsWith("/benachrichtigungen")
+    pathname.startsWith("/benachrichtigungen") ||
+    pathname.startsWith("/einrichten") ||
+    pathname.startsWith("/verwaltung")
   if (ownChrome) return null
-
-  const customerView = pathname.startsWith("/einrichten")
-
-  if (customerView) {
-    return (
-      <header className="border-b bg-card">
-        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3">
-          <Wordmark href="/" />
-          <p className="text-sm text-primary">Einrichtung</p>
-          {session ? (
-            <Button className="ml-auto" variant="outline" size="sm" render={<Link href="/uebersicht" />}>
-              Zur Übersicht
-            </Button>
-          ) : null}
-        </div>
-      </header>
-    )
-  }
 
   const links = [
     { href: "/uebersicht", label: "Übersicht" },

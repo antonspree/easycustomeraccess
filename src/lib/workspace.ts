@@ -412,13 +412,34 @@ export async function updateAgencyProfile(input: {
   agencyId: string
   name: string
   email: string
+  logoUrl: string | null
+  bannerUrl: string | null
+  accent: string
+  background: string
+  text: string
 }) {
   const taken = await getDb()
     .prepare("SELECT id FROM agencies WHERE email = ? AND id <> ?")
     .get(input.email, input.agencyId) as { id: string } | undefined
   if (taken) return { ok: false as const, error: "Diese Einladungsadresse ist schon vergeben." }
   await getDb()
-    .prepare("UPDATE agencies SET name = ?, email = ? WHERE id = ?")
-    .run(input.name, input.email, input.agencyId)
+    .prepare(
+      `UPDATE agencies
+       SET name = ?, email = ?,
+           logo_url = COALESCE(?, logo_url),
+           banner_url = COALESCE(?, banner_url),
+           brand_accent = ?, brand_background = ?, brand_text = ?
+       WHERE id = ?`,
+    )
+    .run(
+      input.name,
+      input.email,
+      input.logoUrl,
+      input.bannerUrl,
+      input.accent,
+      input.background,
+      input.text,
+      input.agencyId,
+    )
   return { ok: true as const }
 }

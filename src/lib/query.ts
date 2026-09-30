@@ -211,6 +211,11 @@ async function migrate() {
   for (const statement of statements) await rawExec(statement)
   await ensureColumn("customers", "archived_at", "TEXT")
   await ensureColumn("sessions", "member_id", "TEXT")
+  await ensureColumn("agencies", "logo_url", "TEXT")
+  await ensureColumn("agencies", "banner_url", "TEXT")
+  await ensureColumn("agencies", "brand_accent", "TEXT")
+  await ensureColumn("agencies", "brand_background", "TEXT")
+  await ensureColumn("agencies", "brand_text", "TEXT")
 
   const agencies = await manyRaw<{
     id: string

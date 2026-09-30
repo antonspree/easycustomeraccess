@@ -19,8 +19,11 @@ import {
   createSession,
   getCustomerForAgency,
   getSetupByToken,
+  listSetupTokens,
   type MemberRole,
 } from "@/lib/db"
+import { parseBrandHex } from "@/lib/brand"
+import { uploadBrandFile } from "@/lib/brand-store"
 import {
   acceptInvitation,
   acceptMemberInvite,
@@ -445,9 +448,25 @@ export async function updateAgencyProfileAction(
   if (!name.ok) return { error: name.error }
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   if (!isEmail(email)) return { error: "Bitte eine gültige Einladungsadresse eintragen." }
-  const saved = await updateAgencyProfile({ agencyId: agency.id, name: name.name, email })
+  const logo = await uploadBrandFile(formData.get("logo") as File, agency.id, "logo")
+  if (logo.error) return { error: logo.error }
+  const banner = await uploadBrandFile(formData.get("banner") as File, agency.id, "banner")
+  if (banner.error) return { error: banner.error }
+  const saved = await updateAgencyProfile({
+    agencyId: agency.id,
+    name: name.name,
+    email,
+    logoUrl: logo.url,
+    bannerUrl: banner.url,
+    accent: parseBrandHex(formData.get("brandAccent"), agency.brandAccent),
+    background: parseBrandHex(formData.get("brandBackground"), agency.brandBackground),
+    text: parseBrandHex(formData.get("brandText"), agency.brandText),
+  })
   if (!saved.ok) return { error: saved.error }
   revalidatePath("/agentur")
   revalidatePath("/uebersicht")
+  for (const token of await listSetupTokens(agency.id)) {
+    revalidatePath(`/einrichten/${token}`)
+  }
   return { saved: "Agentur gespeichert." }
 }

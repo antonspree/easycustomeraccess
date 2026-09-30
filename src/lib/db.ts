@@ -8,6 +8,11 @@ export type Agency = {
   name: string
   email: string
   createdAt: string
+  logoUrl: string | null
+  bannerUrl: string | null
+  brandAccent: string
+  brandBackground: string
+  brandText: string
 }
 
 export type MemberRole = "inhaber" | "mitarbeiter"
@@ -80,7 +85,15 @@ type AgencyRow = {
   email: string
   password_hash: string
   created_at: string
+  logo_url?: string | null
+  banner_url?: string | null
+  brand_accent?: string | null
+  brand_background?: string | null
+  brand_text?: string | null
 }
+
+const agencyColumns =
+  "id, name, email, password_hash, created_at, logo_url, banner_url, brand_accent, brand_background, brand_text"
 
 type MemberRow = {
   id: string
@@ -137,12 +150,21 @@ export function getDb() {
   }
 }
 
+function brandHex(value: string | null | undefined, fallback: string) {
+  return value && /^#[0-9a-fA-F]{6}$/.test(value) ? value.toLowerCase() : fallback
+}
+
 function toAgency(row: AgencyRow): Agency {
   return {
     id: row.id,
     name: row.name,
     email: row.email,
     createdAt: row.created_at,
+    logoUrl: row.logo_url ?? null,
+    bannerUrl: row.banner_url ?? null,
+    brandAccent: brandHex(row.brand_accent, "#6d28d9"),
+    brandBackground: brandHex(row.brand_background, "#ffffff"),
+    brandText: brandHex(row.brand_text, "#000000"),
   }
 }
 
@@ -185,7 +207,7 @@ function toSetup(row: SetupRow): SetupRecord {
 export async function findAgencyByEmail(email: string) {
   const row = await getDb()
     .prepare(
-      "SELECT id, name, email, password_hash, created_at FROM agencies WHERE email = ?",
+      `SELECT ${agencyColumns} FROM agencies WHERE email = ?`,
     )
     .get(email) as AgencyRow | undefined
   return row ?? null
@@ -250,7 +272,7 @@ export async function authenticateMember(email: string, password: string) {
   const row = await findMemberByEmail(email)
   if (!row || !verifyPassword(password, row.password_hash)) return null
   const agency = await getDb()
-    .prepare("SELECT id, name, email, password_hash, created_at FROM agencies WHERE id = ?")
+    .prepare(`SELECT ${agencyColumns} FROM agencies WHERE id = ?`)
     .get(row.agency_id) as AgencyRow | undefined
   if (!agency) return null
   return { agency: toAgency(agency), member: toMember(row) }
@@ -566,7 +588,7 @@ export async function getSetupByToken(token: string) {
     .get(setup.customer_id, setup.agency_id) as CustomerRow | undefined
   const agency = await getDb()
     .prepare(
-      "SELECT id, name, email, password_hash, created_at FROM agencies WHERE id = ?",
+      `SELECT ${agencyColumns} FROM agencies WHERE id = ?`,
     )
     .get(setup.agency_id) as AgencyRow | undefined
   if (!customer || !agency) return null
@@ -575,6 +597,13 @@ export async function getSetupByToken(token: string) {
     customer: toCustomer(customer),
     agency: toAgency(agency),
   }
+}
+
+export async function listSetupTokens(agencyId: string) {
+  const rows = await getDb()
+    .prepare("SELECT token FROM setups WHERE agency_id = ?")
+    .all(agencyId) as { token: string }[]
+  return rows.map((row) => row.token)
 }
 
 export async function markSetupOpened(setupId: string, agencyId: string) {
