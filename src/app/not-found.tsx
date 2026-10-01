@@ -11,7 +11,7 @@ import {
 export default function NotFound() {
   return (
     <main className="mx-auto flex w-full max-w-xl px-4 py-10">
-      <Empty className="border bg-card">
+      <Empty>
         <EmptyHeader>
           <EmptyTitle>Seite nicht gefunden</EmptyTitle>
           <EmptyDescription>Diese Adresse gibt es in EasyCustomerAccess nicht.</EmptyDescription>

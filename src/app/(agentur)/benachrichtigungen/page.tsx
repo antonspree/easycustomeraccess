@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
         </p>
       </div>
       {items.length === 0 ? (
-        <Empty className="border bg-card">
+        <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <BellIcon />
@@ -43,7 +43,7 @@ export default async function NotificationsPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
-            <li key={item.id} className="flex flex-col gap-1 rounded-lg border bg-card p-4">
+            <li key={item.id} className="flex flex-col gap-1 border-t py-6">
               <p className="font-medium">{item.title}</p>
               <p className="text-sm text-muted-foreground">{item.body}</p>
               <p className="text-sm text-muted-foreground">{formatDateTime(item.created_at)}</p>

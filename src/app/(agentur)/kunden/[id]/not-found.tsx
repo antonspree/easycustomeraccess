@@ -11,7 +11,7 @@ import {
 export default function CustomerNotFound() {
   return (
     <div className="mx-auto flex w-full max-w-3xl px-4 py-8">
-      <Empty className="border bg-card">
+      <Empty>
         <EmptyHeader>
           <EmptyTitle>Kunde nicht gefunden</EmptyTitle>
           <EmptyDescription>

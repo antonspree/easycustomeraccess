@@ -18,12 +18,11 @@ import {
 export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   return (
-    <Sidebar variant="floating" {...props}>
+    <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/verwaltung" />}>
-              <span aria-hidden className="size-2.5 rounded-full bg-sidebar-primary" />
               <span className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium">EasyCustomerAccess</span>
                 <span>Verwaltung</span>

@@ -82,12 +82,11 @@ export function AppSidebar({
   ]
 
   return (
-    <Sidebar variant="floating" {...props}>
+    <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/uebersicht" />}>
-              <span aria-hidden className="size-2.5 rounded-full bg-sidebar-primary" />
               <span className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium">EasyCustomerAccess</span>
                 <span>{agencyName}</span>
@@ -107,9 +106,7 @@ export function AppSidebar({
                 >
                   {section.title}
                   {section.title === "Hinweise" && unread > 0 ? (
-                    <span className="ml-auto rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
-                      {unread}
-                    </span>
+                    <span className="ml-auto text-sm tabular-nums">{unread}</span>
                   ) : null}
                 </SidebarMenuButton>
                 {section.items.length > 0 ? (

@@ -6,13 +6,6 @@ import { loginAction, registerAction, type FormState } from "@/lib/actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Field,
   FieldDescription,
   FieldError,
@@ -41,28 +34,25 @@ function AuthScreen({
   className?: string
 }) {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-      <div className={cn("flex w-full max-w-sm flex-col gap-6", className)}>
-        <Link href="/" className="flex items-center gap-2 self-center font-medium">
-          <span aria-hidden className="size-2.5 rounded-full bg-primary" />
+    <div className="flex min-h-svh flex-col justify-center px-6 py-16">
+      <div className={cn("mx-auto flex w-full max-w-sm flex-col gap-10", className)}>
+        <Link href="/" className="text-sm">
           EasyCustomerAccess
         </Link>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>{children}</CardContent>
-        </Card>
-        <FieldDescription className="px-6 text-center">
-          <Link href={switchHref} className="text-primary underline underline-offset-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-heading text-4xl">{title}</h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+        </div>
+        {children}
+        <p className="text-sm text-muted-foreground">
+          <Link href={switchHref} className="text-foreground underline underline-offset-4">
             {switchLabel}
           </Link>
           {" · "}
-          <Link href="/datenschutz" className="text-primary underline underline-offset-4">
+          <Link href="/datenschutz" className="text-foreground underline underline-offset-4">
             Datenschutz
           </Link>
-        </FieldDescription>
+        </p>
       </div>
     </div>
   )

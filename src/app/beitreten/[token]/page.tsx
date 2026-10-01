@@ -23,7 +23,7 @@ export default async function JoinPage({
   if (!invite) {
     return (
       <main className="mx-auto flex w-full max-w-lg px-4 py-10">
-        <Empty className="border bg-card">
+        <Empty>
           <EmptyHeader>
             <EmptyTitle>Einladung ungültig</EmptyTitle>
             <EmptyDescription>

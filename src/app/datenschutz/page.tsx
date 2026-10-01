@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       <section className="flex flex-col gap-2">
         <h2 className="font-heading text-xl">Was gespeichert wird</h2>
         <p>
-          Agenturname, Einladungsadresse, Logo und Banner der Agentur, die drei Farben für den Kundenlink, Namen und E-Mails der Teammitglieder, Passwort-Prüfsummen (scrypt), Kundennamen und Kunden-E-Mails, gewählte Anbieter, bestätigte Schritte mit Zeitpunkt, Hinweise wenn jemand nicht weiterkommt, ob eine Einladung im Postfach als angenommen markiert wurde, und Hinweise in der App.
+          Agenturname, Einladungsadresse, Logo und Banner der Agentur, Namen und E-Mails der Teammitglieder, Passwort-Prüfsummen (scrypt), Kundennamen und Kunden-E-Mails, gewählte Anbieter, bestätigte Schritte mit Zeitpunkt, Hinweise wenn jemand nicht weiterkommt, ob eine Einladung im Postfach als angenommen markiert wurde, und Hinweise in der App. Früher gespeicherte Farbwerte bleiben in der Datenbank und färben die Oberfläche nicht.
         </p>
         <p>
           Lokal ohne Datenbank-Adresse liegt das in der Datei data/eca.sqlite. In der Produktion liegt es in Neon Postgres, angebunden über dasselbe Vercel-Konto. Logo und Banner liegen im Blob-Speicher desselben Kontos. Die Verbindung und der Blob-Schlüssel stehen nur in der Umgebung des Hosts. Es gibt keinen externen Anmeldedienst, keine Anbieter-API und keinen Versand von E-Mails aus der App. Die Plattformverwaltung nutzt ein eigenes Cookie eca_admin. Dessen E-Mail und Passwort stehen nur in der Umgebung, nicht in der Datenbank und nicht im Projekt.

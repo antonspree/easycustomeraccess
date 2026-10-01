@@ -14,7 +14,7 @@ export default async function AgencySettingsPage() {
   const owner = member.role === "inhaber"
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-16 px-6 py-12">
       <div className="flex flex-col gap-1">
         <h1 className="font-heading text-3xl">Agentur</h1>
         <p className="text-sm text-muted-foreground">
@@ -36,9 +36,6 @@ export default async function AgencySettingsPage() {
               email={agency.email}
               logoUrl={agency.logoUrl}
               bannerUrl={agency.bannerUrl}
-              brandAccent={agency.brandAccent}
-              brandBackground={agency.brandBackground}
-              brandText={agency.brandText}
             />
           ) : (
             <div className="flex flex-col gap-1 text-sm">

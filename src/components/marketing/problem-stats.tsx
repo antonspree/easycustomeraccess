@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card"
-
 const data = [
   {
     name: "Wem das Konto gehört",
@@ -23,22 +21,15 @@ const data = [
   },
 ]
 
-/** Layout aus blocks.so stats-03, ohne Grün/Rot. */
 export function ProblemStats() {
   return (
-    <dl className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <dl className="grid w-full grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
       {data.map((item) => (
-        <Card className="py-4 shadow-none" key={item.name}>
-          <CardContent className="flex flex-col gap-2">
-            <dt className="text-sm font-medium text-foreground">{item.name}</dt>
-            <dd className="flex flex-col gap-1">
-              <span className="text-3xl font-semibold text-foreground tabular-nums">
-                {item.stat}
-              </span>
-              <span className="text-sm font-medium text-primary">{item.change}</span>
-            </dd>
-          </CardContent>
-        </Card>
+        <div key={item.name} className="flex flex-col gap-2">
+          <dt className="text-sm text-muted-foreground">{item.name}</dt>
+          <dd className="font-heading text-4xl">{item.stat}</dd>
+          <dd className="text-sm text-muted-foreground">{item.change}</dd>
+        </div>
       ))}
     </dl>
   )

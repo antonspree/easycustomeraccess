@@ -1,8 +1,6 @@
 "use client"
 
-import { CircleCheckIcon } from "lucide-react"
 import { useState } from "react"
-import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
 const steps = [
@@ -32,62 +30,40 @@ const steps = [
   },
 ]
 
-/** Ablauf aus blocks.so onboarding-03. */
 export function LinkSteps() {
   const [activeStep, setActiveStep] = useState(0)
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
-      <div className="flex items-center justify-end gap-4">
-        <span className="text-sm text-foreground">
-          Schritt {activeStep + 1}/{steps.length}
-        </span>
-        <Progress className="w-32" value={(activeStep / steps.length) * 100} />
-      </div>
-      <ul className="flex flex-col gap-3">
+    <div className="flex w-full flex-col gap-8">
+      <p className="text-sm text-muted-foreground">
+        Schritt {activeStep + 1} von {steps.length}
+      </p>
+      <ol className="flex flex-col">
         {steps.map((step, index) => (
-          <li key={step.id}>
+          <li key={step.id} className="border-t">
             <button
-              className={cn(
-                "relative w-full cursor-pointer rounded-lg border bg-card p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                index === activeStep ? "border-primary" : "border-border",
-              )}
+              className="w-full cursor-pointer py-5 text-left focus-visible:outline-none focus-visible:underline"
               onClick={() => setActiveStep(index)}
               type="button"
             >
-              <div className="flex items-start gap-3">
-                {index < activeStep ? (
-                  <CircleCheckIcon aria-hidden className="size-6 shrink-0 text-primary" />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="flex size-6 items-center justify-center font-medium text-primary"
-                  >
-                    {step.id}
-                  </span>
-                )}
-                <div className="flex flex-col gap-1">
-                  <h3
-                    className={cn(
-                      "font-medium",
-                      index < activeStep ? "text-foreground/70 line-through" : "text-foreground",
-                    )}
-                  >
+              <span className="flex items-baseline gap-4">
+                <span className="w-6 text-sm text-muted-foreground">{step.id}</span>
+                <span className="flex flex-col gap-2">
+                  <span className={cn("font-medium", index === activeStep ? "text-foreground" : "text-muted-foreground")}>
                     {step.title}
-                  </h3>
-                  <p className="text-sm leading-6 text-foreground/80">{step.description}</p>
-                </div>
-              </div>
+                  </span>
+                  {index === activeStep ? (
+                    <span className="text-sm leading-6 text-foreground/80">{step.description}</span>
+                  ) : null}
+                </span>
+              </span>
             </button>
           </li>
         ))}
-      </ul>
-      <div className="rounded-lg bg-secondary p-4">
-        <h4 className="text-sm font-medium text-foreground">Wenn jemand nicht weiterkommt</h4>
-        <p className="mt-1 text-sm text-foreground/80">
-          Die Person hinterlässt einen Hinweis am aktuellen Schritt. Das Konto bleibt bei ihr. Sie sehen den Hinweis in der Übersicht und können nachfassen.
-        </p>
-      </div>
+      </ol>
+      <p className="text-sm leading-6 text-muted-foreground">
+        Wenn jemand nicht weiterkommt, hinterlässt die Person einen Hinweis am aktuellen Schritt. Das Konto bleibt bei ihr. Sie sehen den Hinweis in der Übersicht und können nachfassen.
+      </p>
     </div>
   )
 }

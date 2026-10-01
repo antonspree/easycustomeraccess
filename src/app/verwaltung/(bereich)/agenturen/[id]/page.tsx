@@ -18,7 +18,7 @@ export default async function AdminAgencyPage({
   if (!agency) notFound()
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-16 px-6 py-12">
       <div className="flex flex-col gap-1">
         <Link href="/verwaltung" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
           Alle Agenturen
@@ -67,8 +67,9 @@ export default async function AdminAgencyPage({
                       <p className="text-sm">{setup.open ? "Offen" : "Fertig"}</p>
                       <div className="flex flex-wrap gap-2">
                         {setup.providers.map((provider) => (
-                          <span key={provider.providerId} className="flex items-center gap-2 rounded-lg border px-2 py-1">
+                          <span key={provider.providerId} className="flex items-center gap-2">
                             <span className="text-sm">{provider.name}</span>
+                            <span className="text-sm text-muted-foreground">·</span>
                             <StatusBadge status={provider.status} />
                           </span>
                         ))}

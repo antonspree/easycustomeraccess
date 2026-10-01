@@ -18,11 +18,10 @@ export function SiteFooter() {
   if (ownChrome) return null
 
   return (
-    <footer className="border-t bg-card">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-end sm:justify-between">
+    <footer>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-6 py-16 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
-          <p className="flex items-center gap-2 font-heading text-lg">
-            <span aria-hidden className="size-2.5 rounded-full bg-primary" />
+          <p className="font-heading text-lg">
             EasyCustomerAccess
           </p>
           <p className="max-w-md text-sm text-foreground/75">

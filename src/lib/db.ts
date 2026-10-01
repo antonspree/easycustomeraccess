@@ -162,7 +162,7 @@ function toAgency(row: AgencyRow): Agency {
     createdAt: row.created_at,
     logoUrl: row.logo_url ?? null,
     bannerUrl: row.banner_url ?? null,
-    brandAccent: brandHex(row.brand_accent, "#6d28d9"),
+    brandAccent: brandHex(row.brand_accent, "#000000"),
     brandBackground: brandHex(row.brand_background, "#ffffff"),
     brandText: brandHex(row.brand_text, "#000000"),
   }

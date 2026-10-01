@@ -4,7 +4,6 @@ import { useMemo, useState } from "react"
 import Image from "next/image"
 import { providers, stepGrantsAccess } from "@/lib/providers/catalog"
 import type { ProviderDefinition } from "@/lib/providers/types"
-import { buttonVariants } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -88,7 +87,7 @@ export function ProviderChecks({
       {matches.length === 0 ? (
         <p className="text-sm text-muted-foreground">Kein Anbieter passt zu dieser Suche.</p>
       ) : null}
-      <ul className="overflow-hidden rounded-lg border bg-card">
+      <ul>
         {visible.map((provider) => {
           const id = prefix ? `${prefix}-provider-${provider.id}` : `provider-${provider.id}`
           const shown = matches.some((item) => item.id === provider.id)
@@ -128,10 +127,10 @@ function ProviderInfo({ provider }: { provider: ProviderDefinition }) {
   return (
     <Dialog>
       <DialogTrigger
-        className={buttonVariants({ variant: "outline", size: "icon" })}
+        className="px-1 text-sm underline-offset-4 hover:underline"
         aria-label={`Mehr über ${provider.name}`}
       >
-        <span className="font-heading text-base leading-none text-primary">i</span>
+        i
       </DialogTrigger>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>

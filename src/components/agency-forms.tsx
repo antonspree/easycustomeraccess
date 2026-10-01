@@ -193,17 +193,11 @@ export function AgencyProfileForm({
   email,
   logoUrl,
   bannerUrl,
-  brandAccent,
-  brandBackground,
-  brandText,
 }: {
   name: string
   email: string
   logoUrl: string | null
   bannerUrl: string | null
-  brandAccent: string
-  brandBackground: string
-  brandText: string
 }) {
   const [state, action, pending] = useActionState(updateAgencyProfileAction, initial)
   return (
@@ -226,33 +220,20 @@ export function AgencyProfileForm({
           {logoUrl ? (
             // Blob-URLs liegen außerhalb des Bild-Optimierers.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="" className="size-12 rounded-md border object-contain" />
+            <img src={logoUrl} alt="" className="size-12 object-contain" />
           ) : null}
           <Input id="agency-logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
-          <FieldDescription>Erscheint auf dem Kundenlink. PNG, JPEG, WebP oder GIF, höchstens 2 MB.</FieldDescription>
+          <FieldDescription>
+            Erscheint auf dem Kundenlink. PNG, JPEG, WebP oder GIF, höchstens 2 MB. Die Seite bleibt schwarz und weiß.
+          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="agency-banner">Banner</FieldLabel>
           {bannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={bannerUrl} alt="" className="h-24 w-full rounded-md border object-cover" />
+            <img src={bannerUrl} alt="" className="h-24 w-full object-cover" />
           ) : null}
           <Input id="agency-banner" name="banner" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="brand-accent">Akzentfarbe</FieldLabel>
-          <Input id="brand-accent" name="brandAccent" type="color" defaultValue={brandAccent} />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="brand-background">Hintergrund</FieldLabel>
-          <Input id="brand-background" name="brandBackground" type="color" defaultValue={brandBackground} />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="brand-text">Textfarbe</FieldLabel>
-          <Input id="brand-text" name="brandText" type="color" defaultValue={brandText} />
-          <FieldDescription>
-            Logo, Banner und Farben gelten für den Kundenlink. Anmeldung, Startseite und diese Seitenleiste bleiben weiß, schwarz und lila.
-          </FieldDescription>
         </Field>
       </FieldGroup>
       <Button type="submit" disabled={pending} className="w-full sm:w-fit">

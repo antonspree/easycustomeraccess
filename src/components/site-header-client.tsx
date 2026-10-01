@@ -9,8 +9,7 @@ import { cn } from "@/lib/utils"
 
 function Wordmark({ href }: { href: string }) {
   return (
-    <Link href={href} className="flex items-center gap-2 font-heading text-lg leading-none">
-      <span aria-hidden className="size-2.5 rounded-full bg-primary" />
+    <Link href={href} className="font-heading text-lg leading-none">
       EasyCustomerAccess
     </Link>
   )
@@ -42,7 +41,7 @@ export function SiteHeaderClient({
   ]
 
   return (
-    <header className="border-b bg-card">
+    <header>
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
         <Wordmark href={session ? "/uebersicht" : "/"} />
         {session ? (
@@ -70,9 +69,7 @@ export function SiteHeaderClient({
               <BellIcon data-icon="inline-start" />
               Hinweise
               {session.unread > 0 ? (
-                <span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
-                  {session.unread}
-                </span>
+                <span className="text-sm tabular-nums">{session.unread}</span>
               ) : null}
             </Button>
             <p className="text-sm text-foreground/70 sm:ml-auto">

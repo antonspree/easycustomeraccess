@@ -3,9 +3,7 @@ import Link from "next/link"
 import { UsersIcon } from "lucide-react"
 import { RefreshButton } from "@/components/refresh-button"
 import { StatusBadge } from "@/components/status-badge"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
   EmptyContent,
@@ -41,7 +39,7 @@ export default async function OverviewPage({
   })
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-12">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-3xl">
@@ -77,7 +75,7 @@ export default async function OverviewPage({
       </form>
 
       {customers.length === 0 ? (
-        <Empty className="border bg-card">
+        <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <UsersIcon />
@@ -100,60 +98,52 @@ export default async function OverviewPage({
           ) : null}
         </Empty>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col">
           {customers.map((customer) => (
-            <Card key={customer.id}>
-              <CardHeader>
-                <CardTitle>
-                  <Link href={`/kunden/${customer.id}`} className="underline-offset-4 hover:underline">
-                    {customer.name}
-                  </Link>
-                </CardTitle>
-                <CardDescription>{customer.email}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                {customer.setups.map((setup) => {
-                  const progress = setupProgress({
-                    opened: Boolean(setup.openedAt),
-                    providers: setup.providers,
-                  })
-                  const invites = inviteLines({
-                    providers: setup.providers,
-                    invitations: setup.invitations,
-                  })
-                  const stuck = setup.blocks.some((block) => !block.resolvedAt)
-                  return (
-                    <div key={setup.id} className="flex flex-col gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        {progress.confirmed} von {progress.total} Schritten bestätigt
+            <article key={customer.id} className="flex flex-col gap-3 border-t py-8">
+              <div className="flex flex-col gap-1">
+                <Link href={`/kunden/${customer.id}`} className="font-heading text-2xl underline-offset-4 hover:underline">
+                  {customer.name}
+                </Link>
+                <p className="text-sm text-muted-foreground">{customer.email}</p>
+              </div>
+              {customer.setups.map((setup) => {
+                const progress = setupProgress({
+                  opened: Boolean(setup.openedAt),
+                  providers: setup.providers,
+                })
+                const invites = inviteLines({
+                  providers: setup.providers,
+                  invitations: setup.invitations,
+                })
+                const stuck = setup.blocks.some((block) => !block.resolvedAt)
+                return (
+                  <div key={setup.id} className="flex flex-col gap-2 text-sm">
+                    <p className="text-muted-foreground">
+                      {progress.confirmed} von {progress.total} Schritten bestätigt
+                    </p>
+                    <p className="flex flex-wrap gap-x-6 gap-y-1 text-muted-foreground">
+                      {progress.providers.map((provider) => (
+                        <span key={provider.providerId}>
+                          {provider.definition?.name ?? provider.providerId}
+                          {" · "}
+                          <StatusBadge status={provider.status} />
+                        </span>
+                      ))}
+                    </p>
+                    {invites.map((line) => (
+                      <p key={`${line.providerId}-${line.stepId}`} className="text-muted-foreground">
+                        {line.providerName}:{" "}
+                        {line.state === "angenommen"
+                          ? "Einladung angenommen"
+                          : "Einladung noch nicht angenommen"}
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {progress.providers.map((provider) => (
-                          <span key={provider.providerId} className="flex items-center gap-2">
-                            <span className="text-sm">{provider.definition?.name ?? provider.providerId}</span>
-                            <StatusBadge status={provider.status} />
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {invites.map((line) => (
-                          <Badge
-                            key={`${line.providerId}-${line.stepId}`}
-                            variant={line.state === "angenommen" ? "secondary" : "outline"}
-                          >
-                            {line.providerName}:{" "}
-                            {line.state === "angenommen"
-                              ? "Einladung angenommen"
-                              : "Einladung noch nicht angenommen"}
-                          </Badge>
-                        ))}
-                        {stuck ? <Badge variant="destructive">Kommt nicht weiter</Badge> : null}
-                      </div>
-                    </div>
-                  )
-                })}
-              </CardContent>
-            </Card>
+                    ))}
+                    {stuck ? <p>Kommt nicht weiter</p> : null}
+                  </div>
+                )
+              })}
+            </article>
           ))}
         </div>
       )}
