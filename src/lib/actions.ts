@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { clearSession, requireSession, setSession } from "@/lib/auth"
 import { authenticate, confirmStep, createCustomer, knownProviderIds, registerAgency, updateAgencyName, validCustomerEmail } from "@/lib/db"
+import { ratePassword } from "@/lib/password-strength"
 import { cleanName, isEmail, normalizeEmail } from "@/lib/text"
 
 export type FormState = { error?: string }
@@ -13,7 +14,8 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   if (!isEmail(email)) return { error: "Bitte eine gültige E-Mail eintragen." }
   const password = String(formData.get("password") ?? "")
-  if (password.length < 8) return { error: "Das Passwort braucht mindestens 8 Zeichen." }
+  const rating = ratePassword(password, { email, name: name.name })
+  if (!rating.accepted) return { error: rating.hint }
   const created = await registerAgency({ name: name.name, email, password })
   if (!created.ok) return { error: created.error }
   await setSession(created.id)
