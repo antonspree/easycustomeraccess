@@ -46,10 +46,19 @@ const jobs = [
 
 const quietGradient = "linear-gradient(100deg, #151515 0%, #5d6c78 46%, #6e8f80 72%, #151515 100%)"
 
-function monogram(name: string) {
-  const parts = name.split(" ").filter(Boolean)
-  if (parts.length > 1) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-  return name.slice(0, 2)
+const monograms: Record<string, string> = {
+  supabase: "Su",
+  vercel: "Ve",
+  netlify: "Ne",
+  cloudflare: "Cf",
+  github: "Gh",
+  "google-analytics": "GA",
+  "google-search-console": "SC",
+  stripe: "St",
+  resend: "Re",
+  sanity: "Sa",
+  ionos: "Io",
+  plausible: "Pl",
 }
 
 function Mark() {
@@ -204,7 +213,7 @@ export function Landing() {
               <li key={provider.id} className="rounded-[12px] bg-[rgba(21,21,21,0.08)] p-px">
                 <div className="flex items-center gap-3 rounded-[11px] bg-white px-3 py-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[rgba(21,21,21,0.04)] text-[13px] font-medium leading-none text-[rgba(21,21,21,0.64)]">
-                    {monogram(provider.name)}
+                    {monograms[provider.id]}
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[16px] font-medium leading-[1.3]">{provider.name}</span>
