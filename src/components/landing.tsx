@@ -1,4 +1,14 @@
 import Link from "next/link"
+import {
+  ArrowDownIcon,
+  ChartBarIcon,
+  CircleStackIcon,
+  CreditCardIcon,
+  EnvelopeIcon,
+  GlobeAltIcon,
+  LinkIcon,
+  ServerStackIcon,
+} from "@heroicons/react/24/outline"
 import { providers } from "@/lib/catalog"
 
 const roles: Record<string, string> = {
@@ -36,13 +46,13 @@ const steps = [
 ]
 
 const jobs = [
-  { label: "Daten", mark: "data" },
-  { label: "Hosting", mark: "host" },
-  { label: "Domain", mark: "domain" },
-  { label: "Zahlung", mark: "pay" },
-  { label: "Analyse", mark: "chart" },
-  { label: "E-Mail", mark: "mail" },
-] as const
+  { label: "Daten", Icon: CircleStackIcon },
+  { label: "Hosting", Icon: ServerStackIcon },
+  { label: "Domain", Icon: GlobeAltIcon },
+  { label: "Zahlung", Icon: CreditCardIcon },
+  { label: "Analyse", Icon: ChartBarIcon },
+  { label: "E-Mail", Icon: EnvelopeIcon },
+]
 
 const quietGradient = "linear-gradient(100deg, #151515 0%, #5d6c78 46%, #6e8f80 72%, #151515 100%)"
 
@@ -59,91 +69,6 @@ const monograms: Record<string, string> = {
   sanity: "Sa",
   ionos: "Io",
   plausible: "Pl",
-}
-
-function Mark() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden className="shrink-0">
-      <rect x="1.25" y="1.25" width="11.5" height="11.5" rx="3.5" fill="none" stroke="#151515" strokeWidth="1.5" />
-      <rect x="7.25" y="7.25" width="11.5" height="11.5" rx="3.5" fill="#F8F8F8" stroke="#151515" strokeWidth="1.5" />
-    </svg>
-  )
-}
-
-function ArrowDown() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="shrink-0">
-      <path
-        d="M8 3.25v8.5M4.75 8.5 8 12.25 11.25 8.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function JobMark({ kind }: { kind: (typeof jobs)[number]["mark"] }) {
-  const common = {
-    width: 22,
-    height: 22,
-    viewBox: "0 0 22 22",
-    fill: "none",
-    stroke: "#151515",
-    strokeWidth: 1.5,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  }
-  if (kind === "data") {
-    return (
-      <svg {...common}>
-        <ellipse cx="11" cy="6" rx="6" ry="2.25" />
-        <path d="M5 6v4.5c0 1.25 2.7 2.25 6 2.25s6-1 6-2.25V6" />
-        <path d="M5 10.5V15c0 1.25 2.7 2.25 6 2.25s6-1 6-2.25v-4.5" />
-      </svg>
-    )
-  }
-  if (kind === "host") {
-    return (
-      <svg {...common}>
-        <rect x="4" y="3.5" width="14" height="5" rx="1.5" />
-        <rect x="4" y="13.5" width="14" height="5" rx="1.5" />
-        <path d="M7 6h.01M7 16h.01" />
-      </svg>
-    )
-  }
-  if (kind === "domain") {
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="M4.5 11h13M11 4.5c1.6 1.7 2.4 4 2.4 6.5S12.6 15.8 11 17.5C9.4 15.8 8.6 13.5 8.6 11S9.4 6.2 11 4.5Z" />
-      </svg>
-    )
-  }
-  if (kind === "pay") {
-    return (
-      <svg {...common}>
-        <rect x="3.5" y="5.5" width="15" height="11" rx="2" />
-        <path d="M3.5 9.5h15" />
-      </svg>
-    )
-  }
-  if (kind === "chart") {
-    return (
-      <svg {...common}>
-        <path d="M4.5 16.5V12M11 16.5V6.5M17.5 16.5V9.5" />
-      </svg>
-    )
-  }
-  return (
-    <svg {...common}>
-      <rect x="3.5" y="5.5" width="15" height="11" rx="2" />
-      <path d="m4.5 7 6.5 5 6.5-5" />
-    </svg>
-  )
 }
 
 export function Landing() {
@@ -165,7 +90,7 @@ export function Landing() {
         />
         <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2 text-[14px] font-medium leading-[1.5]">
-            <Mark />
+            <LinkIcon className="size-5 shrink-0" aria-hidden />
             EasyCustomerAccess
           </Link>
           <Link
@@ -200,7 +125,7 @@ export function Landing() {
             className="mt-4 inline-flex items-center gap-1.5 text-[16px] font-medium leading-[1.5] text-[rgba(21,21,21,0.36)] transition-colors duration-150 hover:text-[rgba(21,21,21,0.64)]"
           >
             So läuft es
-            <ArrowDown />
+            <ArrowDownIcon className="size-4 shrink-0" aria-hidden />
           </a>
         </div>
       </section>
@@ -244,14 +169,17 @@ export function Landing() {
         <section>
           <h2 className="mb-5 text-[20px] font-semibold leading-[1.2]">Nach der Aufgabe</h2>
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {jobs.map((job) => (
-              <li key={job.label} className="h-[108px] rounded-[12px] bg-[rgba(21,21,21,0.08)] p-px">
-                <div className="flex h-full flex-col justify-between rounded-[11px] bg-white p-3">
-                  <JobMark kind={job.mark} />
-                  <span className="text-[14px] font-medium leading-[1.4]">{job.label}</span>
-                </div>
-              </li>
-            ))}
+            {jobs.map((job) => {
+              const Icon = job.Icon
+              return (
+                <li key={job.label} className="h-[108px] rounded-[12px] bg-[rgba(21,21,21,0.08)] p-px">
+                  <div className="flex h-full flex-col justify-between rounded-[11px] bg-white p-3">
+                    <Icon className="size-6" aria-hidden />
+                    <span className="text-[14px] font-medium leading-[1.4]">{job.label}</span>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         </section>
       </div>
