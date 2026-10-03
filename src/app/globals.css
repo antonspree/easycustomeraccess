@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --app-bg: #f8f8f8;
+  --text: #151515;
+  --text-64: rgba(21, 21, 21, 0.64);
+  --text-48: rgba(21, 21, 21, 0.48);
+  --text-36: rgba(21, 21, 21, 0.36);
+  --text-32: rgba(21, 21, 21, 0.32);
+  --surface: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.8);
+  --fill-04: rgba(21, 21, 21, 0.04);
+  --fill-08: rgba(21, 21, 21, 0.08);
+  --border: #ececec;
+  --divider: rgba(21, 21, 21, 0.08);
+  --button-dark: #353535;
+  --button-dark-hover: #2b2b2b;
+  --radius-input: 8px;
+  --radius-button: 16px;
+  --radius-surface: 24px;
+  --radius-pill: 999px;
+  --content-width: 820px;
+  --wash: linear-gradient(
+    180deg,
+    rgba(80, 120, 240, 0.12) 0%,
+    rgba(190, 225, 200, 0.08) 50%,
+    rgba(248, 248, 248, 0) 100%
+  );
+  --shadow-overlay: 0 16px 40px rgba(21, 21, 21, 0.08);
+}
+
+@theme inline {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: var(--fill-08);
+}
+
+dialog {
+  width: min(420px, calc(100% - 32px));
+  margin: auto;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-surface);
+  background: var(--surface);
+  padding: 16px;
+  color: var(--text);
+  box-shadow: var(--shadow-overlay);
+}
+
+dialog::backdrop {
+  background: rgba(21, 21, 21, 0.16);
+}
