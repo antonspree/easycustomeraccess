@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const googleAnalytics: ProviderDefinition = {
   id: "google-analytics",
@@ -17,7 +17,7 @@ export const googleAnalytics: ProviderDefinition = {
         "Analytics hängt an einem Google-Konto. Dieses Konto muss {email} verwenden. Ein privates Gmail-Konto einer anderen Person eignet sich nicht.",
       substeps: [
         "Öffnen Sie https://accounts.google.com/SignUp, wenn noch kein Google-Konto mit {email} existiert.",
-        "Google fragt nach Name und einem Passwort. Als E-Mail können Sie {email} verwenden, auch wenn das kein Gmail ist (Statt Gmail-Adresse verwenden bzw. Use your existing email).",
+        "Die englische Seite heißt Create a Google Account. Zuerst kommen First name und Last name (optional), dann Next. Danach fragt Google nach E-Mail und Passwort. {email} darf eine bestehende Adresse sein (Use your existing email / Statt Gmail-Adresse verwenden).",
         "Bestätigen Sie die Adresse über den Code, den Google an {email} schickt.",
         "Haben Sie bereits ein Google-Konto mit {email}: öffnen Sie https://analytics.google.com und melden Sie sich damit an.",
       ],
@@ -30,6 +30,11 @@ export const googleAnalytics: ProviderDefinition = {
         "Ein Firmen-Google-Workspace-Konto eignet sich, wenn {email} dazugehört und Sie Administratorrechte für Analytics behalten.",
       ],
       doneWhen: "Sie sind in einem Google-Konto angemeldet, dessen Adresse {email} ist.",
+      image: screenshot(
+        "/guides/google-analytics/google.webp",
+        "Öffentliche Google-Registrierung Create a Google Account mit First name, Last name und Next",
+        "Aufnahme der öffentlichen Kontoerstellung",
+      ),
     },
     {
       id: "property",
@@ -53,6 +58,7 @@ export const googleAnalytics: ProviderDefinition = {
       ],
       pitfalls: ["Nicht eine Property in einem Analytics-Konto der Agentur anlegen."],
       doneWhen: "In Verwaltung sehen Sie ein Konto und eine Property, die nach Ihnen bzw. Ihrer Website benannt sind.",
+      image: schematic("/guides/google-analytics/property.svg", "Schema von Messung starten mit Kontoname und Property"),
     },
     {
       id: "einladung",
@@ -78,6 +84,7 @@ export const googleAnalytics: ProviderDefinition = {
         "Nicht die Inhaberschaft des Google-Kontos teilen (kein Passwort).",
       ],
       doneWhen: "{agencyEmail} steht in der Zugriffsverwaltung als Bearbeiter. Sie bleiben Administrator.",
+      image: schematic("/guides/google-analytics/einladung.svg", "Schema von Nutzer hinzufügen mit Rolle Bearbeiter"),
     },
   ],
 }

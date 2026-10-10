@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, type ProviderDefinition } from "../types.ts"
 
 export const cloudflare: ProviderDefinition = {
   id: "cloudflare",
@@ -23,6 +23,11 @@ export const cloudflare: ProviderDefinition = {
       tips: ["Ein vorhandenes Konto mit {email} können Sie weiterverwenden, wenn Sie Super Administrator bleiben."],
       pitfalls: ["Nicht das Agenturkonto nutzen und Ihre Domain nur „dazu hängen“."],
       doneWhen: "Sie sind im Cloudflare-Dashboard angemeldet oder werden zur E-Mail-Bestätigung gebeten.",
+      image: schematic(
+        "/guides/cloudflare/konto.svg",
+        "Schema der Cloudflare-Registrierung mit Email, Password und Sign Up",
+        "Die echte Sign-up-Seite blockiert automatische Aufnahmen (Bot-Check).",
+      ),
     },
     {
       id: "email",
@@ -40,6 +45,7 @@ export const cloudflare: ProviderDefinition = {
         "Zwei-Faktor-Authentifizierung (2FA) kann Cloudflare später verlangen. Richten Sie sie auf Ihrem Gerät ein, nicht auf dem der Agentur.",
       ],
       doneWhen: "Ihre E-Mail gilt als bestätigt, und das Dashboard ist ohne Verify-Banner nutzbar.",
+      image: schematic("/guides/cloudflare/email.svg", "Schema der Cloudflare-Mail Confirm email address"),
     },
     {
       id: "einladung",
@@ -64,6 +70,7 @@ export const cloudflare: ProviderDefinition = {
         "Ohne bestätigte eigene E-Mail bleibt Invite gesperrt.",
       ],
       doneWhen: "{agencyEmail} steht unter Members als Administrator oder Invite Pending. Sie bleiben Super Administrator.",
+      image: schematic("/guides/cloudflare/einladung.svg", "Schema von Invite mit Rolle Administrator"),
     },
   ],
 }

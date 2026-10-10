@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, type ProviderDefinition } from "../types.ts"
 
 export const github: ProviderDefinition = {
   id: "github",
@@ -26,6 +26,11 @@ export const github: ProviderDefinition = {
       ],
       pitfalls: ["Nicht das GitHub-Konto von {agency} verwenden."],
       doneWhen: "GitHub zeigt das Konto oder bittet um die E-Mail-Bestätigung.",
+      image: schematic(
+        "/guides/github/konto.svg",
+        "Schema der GitHub-Registrierung mit Email, Password und Username",
+        "github.com/signup hat die automatische Aufnahme blockiert.",
+      ),
     },
     {
       id: "email",
@@ -45,6 +50,7 @@ export const github: ProviderDefinition = {
         "GitHub kann 2FA verlangen. Richten Sie Authenticator oder Passkeys auf Ihrem Gerät ein.",
       ],
       doneWhen: "{email} steht in den E-Mail-Einstellungen als verified.",
+      image: schematic("/guides/github/email.svg", "Schema von Settings → Emails mit Verify email address"),
     },
     {
       id: "organisation",
@@ -64,6 +70,7 @@ export const github: ProviderDefinition = {
       tips: ["Eine vorhandene eigene Organisation dürfen Sie weiterverwenden, wenn Sie Owner sind."],
       pitfalls: ["Nicht die Organisation von {agency} nutzen."],
       doneWhen: "Die Organisation existiert, trägt Ihren Namen und Sie stehen als Owner.",
+      image: schematic("/guides/github/organisation.svg", "Schema von Create an organization"),
     },
     {
       id: "einladung",
@@ -84,6 +91,7 @@ export const github: ProviderDefinition = {
       ],
       pitfalls: ["Owner nicht an die Agentur vergeben."],
       doneWhen: "{agencyEmail} bzw. das Agenturkonto steht als Member oder ausstehende Einladung. Sie bleiben Owner.",
+      image: schematic("/guides/github/einladung.svg", "Schema von Invite member mit Rolle Member"),
     },
   ],
 }
