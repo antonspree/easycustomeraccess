@@ -3,8 +3,8 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "EasyCustomerAccess",
-    template: "%s · EasyCustomerAccess",
+    default: "Okklar",
+    template: "%s · Okklar",
   },
   description:
     "Agenturen lassen Konten bei Drittanbietern auf den Namen der Kundschaft laufen. Die Person bestätigt die Schritte über einen geheimen Link.",

@@ -91,7 +91,7 @@ export function Landing() {
         <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2 text-[14px] font-medium leading-[1.5]">
             <LinkIcon className="size-5 shrink-0" aria-hidden />
-            EasyCustomerAccess
+            Okklar
           </Link>
           <Link
             href="/anmelden"
@@ -209,7 +209,7 @@ export function Landing() {
 
       <footer className="border-t border-[rgba(21,21,21,0.08)]">
         <div className="mx-auto flex w-full max-w-[960px] flex-col gap-3 px-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] leading-[1.5] text-[rgba(21,21,21,0.36)]">EasyCustomerAccess</p>
+          <p className="text-[13px] leading-[1.5] text-[rgba(21,21,21,0.36)]">Okklar</p>
           <nav className="flex gap-4">
             <Link
               href="/anmelden"

@@ -40,7 +40,7 @@ export function AppNav() {
     <header className="px-4 py-3">
       <div className="relative flex items-center justify-between gap-4">
         <Link href="/uebersicht" className="text-[14px] font-medium leading-[1.5]">
-          EasyCustomerAccess
+          Okklar
         </Link>
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 md:flex">
           <Items current={current} />
@@ -65,7 +65,7 @@ export function PublicBar({ action }: { action: { href: string; label: string } 
   return (
     <header className="flex items-center justify-between px-4 py-3">
       <Link href="/" className="text-[14px] font-medium leading-[1.5]">
-        EasyCustomerAccess
+        Okklar
       </Link>
       <Link
         href={action.href}
