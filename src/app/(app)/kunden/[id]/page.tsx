@@ -54,9 +54,17 @@ export default async function CustomerLinkPage({ params }: { params: Promise<{ i
           <div className="mt-5">
             <CopyLink url={url} />
           </div>
-          <Link href="/uebersicht" className="mt-8 inline-block text-[14px] font-medium leading-[1.5] text-[var(--text-64)]">
-            Zur Übersicht
-          </Link>
+          <div className="mt-8 flex items-center gap-4">
+            <Link href="/uebersicht" className="text-[14px] font-medium leading-[1.5] text-[var(--text-64)]">
+              Zur Übersicht
+            </Link>
+            <Link
+              href={`/kunden/${id}/bearbeiten`}
+              className="text-[14px] font-medium leading-[1.5] text-[var(--text-64)]"
+            >
+              Kunde bearbeiten
+            </Link>
+          </div>
         </div>
       </Column>
   )
