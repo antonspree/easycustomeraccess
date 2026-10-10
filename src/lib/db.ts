@@ -127,8 +127,8 @@ export async function customerForAgency(agencyId: string, customerId: string) {
     [customerId, agencyId],
   )
   if (!customer) return null
-  const setup = await one<{ id: string; token: string }>(
-    "SELECT id, token FROM setups WHERE customer_id = ? AND agency_id = ?",
+  const setup = await one<{ id: string; token: string; opened_at: string | null }>(
+    "SELECT id, token, opened_at FROM setups WHERE customer_id = ? AND agency_id = ?",
     [customerId, agencyId],
   )
   if (!setup) return null
@@ -144,7 +144,7 @@ export async function customerForAgency(agencyId: string, customerId: string) {
     orderedProviders(rows.map((row) => row.provider_id)),
     confirmations.map((row) => ({ providerId: row.provider_id, stepId: row.step_id })),
   )
-  return { customer, token: setup.token, progress }
+  return { customer, token: setup.token, openedAt: setup.opened_at, progress }
 }
 
 export async function setupByToken(token: string) {
