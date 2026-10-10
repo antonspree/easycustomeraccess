@@ -30,7 +30,7 @@ export function usesPostgres() {
 async function sqlite() {
   if (!globalForQuery.sqlite) {
     const { DatabaseSync } = await import("node:sqlite")
-    const file = process.env.ECA_DB_PATH || path.join(process.cwd(), "data", "eca.sqlite")
+    const file = process.env.BLOKR_DB_PATH || path.join(process.cwd(), "data", "blokr.sqlite")
     mkdirSync(path.dirname(file), { recursive: true })
     const db = new DatabaseSync(file) as unknown as SqliteDb
     db.exec("PRAGMA foreign_keys = ON")
