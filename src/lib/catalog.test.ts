@@ -60,12 +60,11 @@ test("jeder Schritt hat Text, gültige Platzhalter und vorhandene Bilder", () =>
         assert.ok(step.urlLabel?.trim(), `${provider.id}/${step.id}: urlLabel fehlt`)
       }
 
-      if (step.image) {
-        assert.ok(step.image.src.startsWith("/guides/"), `${provider.id}/${step.id}: Bildpfad`)
-        assert.ok(existsSync(resolve(publicRoot, step.image.src.slice(1))), `${provider.id}/${step.id}: Datei fehlt ${step.image.src}`)
-        assert.ok(step.image.alt.trim())
-        assert.ok(step.image.kind === "screenshot" || step.image.kind === "schematic")
-      }
+      assert.ok(step.image, `${provider.id}/${step.id}: Bild fehlt`)
+      assert.ok(step.image.src.startsWith("/guides/"), `${provider.id}/${step.id}: Bildpfad`)
+      assert.ok(existsSync(resolve(publicRoot, step.image.src.slice(1))), `${provider.id}/${step.id}: Datei fehlt ${step.image.src}`)
+      assert.ok(step.image.alt.trim())
+      assert.ok(step.image.kind === "screenshot" || step.image.kind === "schematic")
     }
   }
 })

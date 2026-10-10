@@ -68,3 +68,11 @@ export function placeholderTokens(text: string) {
 export function allowedPlaceholders() {
   return PLACEHOLDERS
 }
+
+export function screenshot(src: string, alt: string, caption?: string): StepImage {
+  return { src, alt, kind: "screenshot", caption }
+}
+
+export function schematic(src: string, alt: string, caption?: string): StepImage {
+  return { src, alt, kind: "schematic", caption }
+}

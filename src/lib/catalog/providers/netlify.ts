@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const netlify: ProviderDefinition = {
   id: "netlify",
@@ -15,15 +15,20 @@ export const netlify: ProviderDefinition = {
       urlLabel: "Registrierung bei Netlify öffnen",
       intro: "Das Team, in dem später die Website liegt, muss Ihnen gehören — nicht der Agentur.",
       substeps: [
-        "Öffnen Sie https://app.netlify.com/signup.",
-        "Wählen Sie Sign up with email oder die Anmeldung über GitHub / GitLab / Bitbucket, sofern das Konto zu {email} gehört.",
-        "Tragen Sie bei der E-Mail-Registrierung {email} ein und setzen Sie ein eigenes Passwort.",
-        "Schließen Sie Sign up ab.",
+        "Öffnen Sie https://app.netlify.com/signup. Links steht Start for free, die Anbieterbuttons heißen Sign up with Google, Sign up with GitHub, Sign up with GitLab und Sign up with Bitbucket.",
+        "Für E-Mail klicken Sie auf Sign up with email. Tragen Sie {email} und ein eigenes Passwort ein.",
+        "Google, GitHub, GitLab oder Bitbucket nur nutzen, wenn das Konto zu {email} gehört.",
+        "Already have an account? Log in, wenn das Konto schon existiert.",
       ],
       tips: ["Ein vorhandenes Konto mit {email} können Sie weiterverwenden."],
       pitfalls: ["Nicht mit dem Netlify-Konto von {agency} arbeiten und Sie nur als Zuschauer einladen."],
       doneWhen: "Sie sind bei Netlify angemeldet und sehen Ihr Team-Dashboard.",
       help: "Already have an account? dann Log in wählen.",
+      image: screenshot(
+        "/guides/netlify/konto.png",
+        "Öffentliche Netlify-Registrierung mit Google, GitHub, GitLab, Bitbucket und Sign up with email",
+        "Aufnahme von app.netlify.com/signup",
+      ),
     },
     {
       id: "email",
@@ -39,6 +44,7 @@ export const netlify: ProviderDefinition = {
       tips: ["Im Dashboard gibt es oft Resend verification email, falls nichts ankommt."],
       pitfalls: ["Den Link nicht in einem fremden Browser-Profil öffnen."],
       doneWhen: "Netlify akzeptiert die Anmeldung ohne erneute E-Mail-Aufforderung.",
+      image: schematic("/guides/netlify/email.svg", "Schema der Netlify-Mail Verify your email"),
     },
     {
       id: "einladung",
@@ -65,6 +71,7 @@ export const netlify: ProviderDefinition = {
         "Falls Add members fehlt, sind Sie nicht Owner dieses Teams.",
       ],
       doneWhen: "{agencyEmail} steht unter Members als Developer oder als ausstehende Einladung. Sie bleiben Owner.",
+      image: schematic("/guides/netlify/einladung.svg", "Schema von Add members mit Rolle Developer"),
     },
   ],
 }

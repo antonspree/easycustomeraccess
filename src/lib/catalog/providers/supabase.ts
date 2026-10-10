@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const supabase: ProviderDefinition = {
   id: "supabase",
@@ -16,11 +16,11 @@ export const supabase: ProviderDefinition = {
       intro:
         "Das Konto muss auf Ihre E-Mail laufen. Wenn die Agentur sich registriert und Sie später „übernimmt“, gehören Organisation und Rechnung nicht Ihnen.",
       substeps: [
-        "Öffnen Sie https://supabase.com/dashboard/sign-up.",
-        "Die Seite ist auf Englisch. Oben sehen Sie typischerweise Continue with GitHub und Continue with SSO.",
-        "Nutzen Sie die E-Mail-Registrierung darunter. Tragen Sie unter Email genau {email} ein.",
+        "Öffnen Sie https://supabase.com/dashboard/sign-up. Die Überschrift lautet Get started, darunter Create a new account.",
+        "Die Seite ist auf Englisch. Oben stehen Continue with GitHub, Continue with ChatGPT und Continue with SSO.",
+        "Darunter, nach or, liegt die E-Mail-Registrierung. Tragen Sie unter Email genau {email} ein.",
         "Wählen Sie ein eigenes Passwort unter Password. Die Agentur braucht dieses Passwort nicht.",
-        "Klicken Sie auf Sign Up.",
+        "Klicken Sie auf die grüne Schaltfläche Sign up.",
       ],
       tips: [
         "Haben Sie schon ein Supabase-Konto mit {email}? Dann melden Sie sich an und fahren Sie mit der E-Mail-Bestätigung bzw. der Organisation fort.",
@@ -31,7 +31,12 @@ export const supabase: ProviderDefinition = {
         "Nach Sign Up erscheint oft zuerst der Hinweis, die E-Mail zu bestätigen — das ist der nächste Schritt.",
       ],
       doneWhen: "Supabase fordert eine E-Mail-Bestätigung an oder Sie landen im Dashboard mit Ihrer Adresse {email}.",
-      help: "Die Meldung User already registered bedeutet: Das Konto existiert. Nutzen Sie Log in statt Sign Up.",
+      help: "Have an account? Sign in, wenn das Konto schon existiert. Nicht Sign up wiederholen.",
+      image: screenshot(
+        "/guides/supabase/konto.png",
+        "Öffentliche Supabase-Registrierung mit GitHub, ChatGPT, SSO, Email, Password und Sign up",
+        "Aufnahme von supabase.com/dashboard/sign-up",
+      ),
     },
     {
       id: "email",
@@ -51,6 +56,7 @@ export const supabase: ProviderDefinition = {
         "Manche Anbieter blockieren den ersten Klick. Dann den Link kopieren und einfügen.",
       ],
       doneWhen: "Sie sind im Supabase-Dashboard angemeldet, ohne erneute Aufforderung zur E-Mail-Bestätigung.",
+      image: schematic("/guides/supabase/email.svg", "Schema einer Bestätigungsmail von Supabase"),
     },
     {
       id: "organisation",
@@ -73,6 +79,7 @@ export const supabase: ProviderDefinition = {
         "Owner nicht an die Agentur abgeben.",
       ],
       doneWhen: "Die Organisation trägt Ihren Namen und {email} steht als Owner.",
+      image: schematic("/guides/supabase/organisation.svg", "Schema der Organization Settings bei Supabase"),
     },
     {
       id: "einladung",
@@ -98,6 +105,7 @@ export const supabase: ProviderDefinition = {
       ],
       doneWhen: "{agencyEmail} steht unter Team als eingeladen oder als Administrator. Sie bleiben Owner.",
       help: "Wenn Invite fehlt, sind Sie nicht in der richtigen Organisation oder nicht als Owner angemeldet.",
+      image: schematic("/guides/supabase/einladung.svg", "Schema der Einladung mit Rolle Administrator"),
     },
     {
       id: "projekt",
@@ -120,6 +128,7 @@ export const supabase: ProviderDefinition = {
         "Das Datenbankpasswort nicht in den Chat oder in eine offene E-Mail schreiben.",
       ],
       doneWhen: "Das Projekt ist bereit (Ready) und liegt in Ihrer Organisation in der Region Frankfurt.",
+      image: schematic("/guides/supabase/projekt.svg", "Schema des Dialogs Create new project mit Region Frankfurt"),
     },
     {
       id: "pruefen",
@@ -134,6 +143,7 @@ export const supabase: ProviderDefinition = {
         "Stellen Sie sicher, dass niemand außer Ihnen Owner ist, es sei denn, Sie haben das bewusst so gewollt.",
       ],
       doneWhen: "Sie sind Owner, die Agentur ist Administrator oder hat eine offene Administrator-Einladung.",
+      image: schematic("/guides/supabase/pruefen.svg", "Schema der Team-Liste mit Owner und Administrator"),
     },
   ],
 }

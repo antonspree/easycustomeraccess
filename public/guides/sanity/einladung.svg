@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Invite">
+  <rect width="800" height="480" fill="#f3f3f3"/>
+  <rect x="16" y="16" width="768" height="448" rx="16" fill="#fff" stroke="#ececec"/>
+  <rect x="16" y="16" width="768" height="40" rx="16" fill="#f7f7f7"/>
+  <rect x="16" y="40" width="768" height="16" fill="#f7f7f7"/>
+  <circle cx="40" cy="36" r="5" fill="#e0e0e0"/>
+  <circle cx="56" cy="36" r="5" fill="#e0e0e0"/>
+  <circle cx="72" cy="36" r="5" fill="#e0e0e0"/>
+  <text x="92" y="40" font-size="12" fill="#8a8a8a" font-family="system-ui, sans-serif">sanity.io/manage/…/members</text>
+  <text x="40" y="84" font-size="20" font-weight="600" fill="#151515" font-family="system-ui, sans-serif">Invite</text>
+  <g font-family="system-ui, sans-serif">
+    <text x="40" y="100" font-size="13" fill="#6b6b6b">Email</text>
+    <rect x="40" y="108" width="400" height="36" rx="8" fill="#fff" stroke="#d9d9d9"/>
+    <text x="54" y="131" font-size="14" fill="#151515">agentur@…</text>
+    <text x="40" y="170" font-size="13" fill="#6b6b6b">Role</text>
+    <rect x="40" y="178" width="400" height="36" rx="8" fill="#fff" stroke="#d9d9d9"/>
+    <text x="54" y="201" font-size="14" fill="#151515">Administrator</text>
+    
+    <rect x="40" y="260" width="120" height="36" rx="16" fill="#353535"/>
+    <text x="100" y="283" text-anchor="middle" font-size="14" fill="#fff">Invite</text>
+  </g>
+  
+  <text x="40" y="444" font-size="12" fill="#8a8a8a" font-family="system-ui, sans-serif">Schematische Darstellung — keine Originaloberfläche</text>
+</svg>

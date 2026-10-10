@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const vercel: ProviderDefinition = {
   id: "vercel",
@@ -16,10 +16,10 @@ export const vercel: ProviderDefinition = {
       intro:
         "Sie registrieren sich selbst. Hobby ist der kostenlose Starttarif. Teammitglieder lassen sich dort nicht einladen; das kommt im Schritt zur Einladung.",
       substeps: [
-        "Öffnen Sie https://vercel.com/signup.",
-        "Sie können Continue with GitHub, GitLab, Bitbucket oder die E-Mail-Registrierung nutzen.",
-        "Wenn Sie E-Mail wählen: tragen Sie {email} ein und folgen Sie Sign Up.",
-        "Nutzen Sie GitHub nur, wenn dieses GitHub-Konto zu {email} gehört.",
+        "Öffnen Sie https://vercel.com/signup. Die Überschrift lautet Your first deploy is just a sign-up away.",
+        "Sichtbar sind Continue with Google, Continue with GitHub, Continue with ChatGPT und Continue with Apple.",
+        "Für E-Mail: klicken Sie auf Show other options und dann auf Continue with Email. Tragen Sie {email} ein.",
+        "Google oder GitHub nur nutzen, wenn dieses Konto zu {email} gehört.",
       ],
       tips: ["Ein vorhandenes Konto mit {email} können Sie weiterverwenden. Nicht das Konto der Agentur nehmen."],
       pitfalls: [
@@ -27,7 +27,12 @@ export const vercel: ProviderDefinition = {
         "Commercial-Projekte dürfen laut Vercel nicht dauerhaft auf Hobby laufen. {agency} klärt den Tarif mit Ihnen.",
       ],
       doneWhen: "Sie sind bei Vercel angemeldet und sehen das Dashboard unter Ihrer Adresse {email}.",
-      help: "Account already exists: dann Log in statt Sign Up verwenden.",
+      help: "Oben rechts steht Log In, wenn das Konto schon existiert.",
+      image: screenshot(
+        "/guides/vercel/konto.png",
+        "Öffentliche Vercel-Registrierung mit Google, GitHub, ChatGPT, Apple und Continue with Email",
+        "Aufnahme von vercel.com/signup",
+      ),
     },
     {
       id: "email",
@@ -43,6 +48,7 @@ export const vercel: ProviderDefinition = {
       tips: ["Keine Mail? Im Dashboard unter Account Settings → Email gibt es meist Resend."],
       pitfalls: ["Den Link in dem Browser öffnen, in dem Sie bei Vercel angemeldet bleiben wollen."],
       doneWhen: "Vercel zeigt die Adresse {email} als bestätigt (Verified).",
+      image: schematic("/guides/vercel/email.svg", "Schema der Vercel-Mail Verify Email Address"),
     },
     {
       id: "team",
@@ -65,6 +71,7 @@ export const vercel: ProviderDefinition = {
         "Hobby erlaubt nur eine Person. Für die Einladung der Agentur brauchen Sie später Pro.",
       ],
       doneWhen: "Im Team-Umschalter steht Ihr Name oder Ihre Firma, und Sie sind Owner dieses Teams.",
+      image: schematic("/guides/vercel/team.svg", "Schema des Dialogs Create a Team"),
     },
     {
       id: "einladung",
@@ -93,6 +100,7 @@ export const vercel: ProviderDefinition = {
       ],
       doneWhen: "{agencyEmail} steht unter Members als Developer oder als ausstehende Einladung. Sie bleiben Owner.",
       help: "Wenn Invite fehlt, sind Sie nicht Owner oder das Team ist noch Hobby.",
+      image: schematic("/guides/vercel/einladung.svg", "Schema der Members-Seite mit Rolle Developer"),
     },
   ],
 }
