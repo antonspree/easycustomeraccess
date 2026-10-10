@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react"
 import { providers } from "@/lib/catalog"
 
-export function ProviderPicker() {
+export function ProviderPicker({ defaultSelected }: { defaultSelected?: string[] } = {}) {
   const [query, setQuery] = useState("")
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [info, setInfo] = useState<(typeof providers)[number] | null>(null)
@@ -51,6 +51,7 @@ export function ProviderPicker() {
                 name="providerId"
                 value={provider.id}
                 type="checkbox"
+                defaultChecked={defaultSelected?.includes(provider.id)}
                 className="mt-1 size-4 shrink-0 accent-[#353535]"
               />
               <div className="min-w-0 flex-1">

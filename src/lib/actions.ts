@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation"
 import { clearSession, requireSession, setSession } from "@/lib/auth"
-import { authenticate, confirmStep, createCustomer, knownProviderIds, registerAgency, updateAgencyName, validCustomerEmail } from "@/lib/db"
+import { authenticate, confirmStep, createCustomer, deleteCustomer, knownProviderIds, registerAgency, updateAgencyName, updateCustomer, validCustomerEmail } from "@/lib/db"
 import { ratePassword } from "@/lib/password-strength"
 import { cleanName, isEmail, normalizeEmail } from "@/lib/text"
 
@@ -67,4 +67,33 @@ export async function confirmStepAction(formData: FormData) {
   const stepId = String(formData.get("stepId") ?? "")
   const result = await confirmStep({ token, providerId, stepId })
   redirect(result.ok ? `/einrichten/${token}` : `/einrichten/${token}?hinweis=1`)
+}
+
+export async function updateCustomerAction(
+  customerId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const agency = await requireSession()
+  const name = cleanName(String(formData.get("name") ?? ""))
+  if (!name.ok) return { error: name.error }
+  const email = validCustomerEmail(String(formData.get("email") ?? ""))
+  if (!email.ok) return { error: email.error }
+  const providerIds = knownProviderIds(formData.getAll("providerId").map(String))
+  const result = await updateCustomer({
+    agencyId: agency.id,
+    customerId,
+    name: name.name,
+    email: email.email,
+    providerIds,
+  })
+  if (!result.ok) return { error: result.error }
+  redirect(`/kunden/${customerId}`)
+}
+
+export async function deleteCustomerAction(customerId: string) {
+  const agency = await requireSession()
+  const result = await deleteCustomer(agency.id, customerId)
+  if (!result.ok) throw new Error(result.error)
+  redirect("/uebersicht")
 }

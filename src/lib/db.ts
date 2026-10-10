@@ -140,11 +140,12 @@ export async function customerForAgency(agencyId: string, customerId: string) {
     "SELECT provider_id, step_id FROM step_confirmations WHERE setup_id = ?",
     [setup.id],
   )
+  const providers = orderedProviders(rows.map((row) => row.provider_id))
   const progress = progressFor(
-    orderedProviders(rows.map((row) => row.provider_id)),
+    providers,
     confirmations.map((row) => ({ providerId: row.provider_id, stepId: row.step_id })),
   )
-  return { customer, token: setup.token, openedAt: setup.opened_at, progress }
+  return { customer, token: setup.token, openedAt: setup.opened_at, progress, providers }
 }
 
 export async function setupByToken(token: string) {
@@ -210,4 +211,88 @@ export function validCustomerEmail(value: string) {
   const email = normalizeEmail(value)
   if (!isEmail(email)) return { ok: false as const, error: "Bitte eine gültige E-Mail eintragen." }
   return { ok: true as const, email }
+}
+
+export async function updateCustomer(input: {
+  agencyId: string
+  customerId: string
+  name: string
+  email: string
+  providerIds: string[]
+}) {
+  const customer = await one<{ id: string; agency_id: string }>(
+    "SELECT id, agency_id FROM customers WHERE id = ? AND agency_id = ?",
+    [input.customerId, input.agencyId],
+  )
+  if (!customer) return { ok: false as const, error: "Kunde nicht gefunden." }
+
+  const known = input.providerIds.filter((id) => getProvider(id))
+  if (known.length === 0) return { ok: false as const, error: "Bitte mindestens einen Anbieter wählen." }
+
+  const setup = await one<{ id: string }>(
+    "SELECT id FROM setups WHERE customer_id = ? AND agency_id = ?",
+    [input.customerId, input.agencyId],
+  )
+  if (!setup) return { ok: false as const, error: "Setup nicht gefunden." }
+
+  await transaction(async () => {
+    await run("UPDATE customers SET name = ?, email = ? WHERE id = ?", [
+      input.name,
+      normalizeEmail(input.email),
+      input.customerId,
+    ])
+
+    const existingProviders = await many<{ provider_id: string }>(
+      "SELECT provider_id FROM setup_providers WHERE setup_id = ?",
+      [setup.id],
+    )
+    const existingIds = new Set(existingProviders.map((p) => p.provider_id))
+    const newIds = new Set(known)
+
+    const removed = existingProviders.filter((p) => !newIds.has(p.provider_id))
+    for (const { provider_id } of removed) {
+      await run("DELETE FROM step_confirmations WHERE setup_id = ? AND provider_id = ?", [setup.id, provider_id])
+      await run("DELETE FROM setup_providers WHERE setup_id = ? AND provider_id = ?", [setup.id, provider_id])
+    }
+
+    const added = known.filter((id) => !existingIds.has(id))
+    const maxPosition =
+      existingProviders.length > 0
+        ? Math.max(
+            ...(await many<{ position: number }>("SELECT position FROM setup_providers WHERE setup_id = ?", [
+              setup.id,
+            ])).map((p) => p.position),
+          )
+        : -1
+    for (const [index, providerId] of added.entries()) {
+      await run("INSERT INTO setup_providers (setup_id, provider_id, position) VALUES (?, ?, ?)", [
+        setup.id,
+        providerId,
+        maxPosition + 1 + index,
+      ])
+    }
+  })
+  return { ok: true as const }
+}
+
+export async function deleteCustomer(agencyId: string, customerId: string) {
+  const customer = await one<{ id: string; agency_id: string }>(
+    "SELECT id, agency_id FROM customers WHERE id = ? AND agency_id = ?",
+    [customerId, agencyId],
+  )
+  if (!customer) return { ok: false as const, error: "Kunde nicht gefunden." }
+
+  const setup = await one<{ id: string }>(
+    "SELECT id FROM setups WHERE customer_id = ? AND agency_id = ?",
+    [customerId, agencyId],
+  )
+  if (!setup) return { ok: false as const, error: "Setup nicht gefunden." }
+
+  await transaction(async () => {
+    await run("DELETE FROM step_confirmations WHERE setup_id = ?", [setup.id])
+    await run("DELETE FROM setup_providers WHERE setup_id = ?", [setup.id])
+    await run("DELETE FROM setups WHERE id = ?", [setup.id])
+    await run("DELETE FROM customers WHERE id = ?", [customerId])
+  })
+  return { ok: true as const }
 }
