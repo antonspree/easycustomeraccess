@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const stripe: ProviderDefinition = {
   id: "stripe",
@@ -16,8 +16,8 @@ export const stripe: ProviderDefinition = {
       intro:
         "Stripe zahlt an die Person oder Firma, die im Konto steht. Das müssen Sie sein. Die Agentur darf kein Konto „für Sie“ besitzen.",
       substeps: [
-        "Öffnen Sie https://dashboard.stripe.com/register.",
-        "Tragen Sie {email} und ein eigenes Passwort ein und klicken Sie auf Create account bzw. Konto erstellen.",
+        "Öffnen Sie https://dashboard.stripe.com/register. Die Karte heißt Create your Stripe account.",
+        "Felder: Email, Full name, Password, Country. Tragen Sie {email} und Ihren Namen ein, nicht {agency}. Klicken Sie auf Create account. Darunter gibt es Or sign up with Google.",
         "Stripe führt durch Land, Art des Geschäfts und Kontaktdaten. Tragen Sie Ihre Firma bzw. sich selbst ein, nicht {agency}.",
         "Bank- und Ausweisdaten können später folgen. Für die Einladung der Agentur reicht oft das angelegte Konto.",
       ],
@@ -30,6 +30,11 @@ export const stripe: ProviderDefinition = {
         "Geschäftsadresse und Steuernummer müssen zu Ihnen gehören.",
       ],
       doneWhen: "Sie sind im Stripe-Dashboard angemeldet, und unter Kontoeinstellungen stehen Ihr Name bzw. Ihre Firma und {email}.",
+      image: screenshot(
+        "/guides/stripe/konto.png",
+        "Öffentliche Stripe-Registrierung mit Email, Full name, Password, Country und Create account",
+        "Aufnahme von dashboard.stripe.com/register",
+      ),
     },
     {
       id: "email",
@@ -44,6 +49,7 @@ export const stripe: ProviderDefinition = {
       tips: ["Erneut senden: oft oben im Dashboard als Banner oder unter Profile settings."],
       pitfalls: ["2FA später auf Ihrem Gerät einrichten, nicht auf dem der Agentur."],
       doneWhen: "Stripe zeigt keine ausstehende E-Mail-Bestätigung mehr.",
+      image: schematic("/guides/stripe/email.svg", "Schema der Stripe-Mail Confirm my email"),
     },
     {
       id: "einladung",
@@ -70,6 +76,7 @@ export const stripe: ProviderDefinition = {
         "Geheime Schlüssel (Secret keys) nicht in Blokr und nicht unverschlüsselt per Mail schicken. Die Agentur erzeugt bei Bedarf eigene Schlüssel in Ihrem Konto.",
       ],
       doneWhen: "{agencyEmail} steht im Team als Developer oder als ausstehende Einladung. Sie bleiben Kontoinhaber.",
+      image: schematic("/guides/stripe/einladung.svg", "Schema von Add member mit Rolle Developer"),
     },
   ],
 }

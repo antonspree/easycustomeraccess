@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const resend: ProviderDefinition = {
   id: "resend",
@@ -15,14 +15,18 @@ export const resend: ProviderDefinition = {
       urlLabel: "Registrierung bei Resend öffnen",
       intro: "Resend versendet später E-Mails in Ihrem Namen. Deshalb muss das Konto Ihnen gehören.",
       substeps: [
-        "Öffnen Sie https://resend.com/signup.",
-        "Wählen Sie Continue with Google oder die E-Mail-Registrierung.",
-        "Bei E-Mail: {email} eintragen. Bei Google: nur das Google-Konto mit {email}.",
-        "Schließen Sie Sign up ab.",
+        "Öffnen Sie https://resend.com/signup. Die Überschrift lautet Create a Resend account.",
+        "Oben stehen Log in with Google und Log in with GitHub — nur nutzen, wenn das Konto zu {email} gehört.",
+        "Darunter Email und Password. Tragen Sie {email} ein und klicken Sie auf Create account.",
       ],
       tips: ["Ein vorhandenes Konto mit {email} können Sie weiterverwenden."],
       pitfalls: ["Nicht das Resend-Konto der Agentur verwenden."],
       doneWhen: "Sie sind bei Resend angemeldet oder werden zur E-Mail-Bestätigung gebeten.",
+      image: screenshot(
+        "/guides/resend/konto.webp",
+        "Öffentliche Resend-Registrierung mit Google, GitHub, Email, Password und Create account",
+        "Aufnahme von resend.com/signup",
+      ),
     },
     {
       id: "email",
@@ -37,6 +41,7 @@ export const resend: ProviderDefinition = {
       tips: ["Keine Mail? Auf der Anmeldeseite erneut senden lassen."],
       pitfalls: ["Den Link im selben Browser öffnen, in dem Sie weiterarbeiten."],
       doneWhen: "Das Resend-Dashboard ist ohne Verify-Hinweis nutzbar.",
+      image: schematic("/guides/resend/email.svg", "Schema der Resend-Bestätigungsmail"),
     },
     {
       id: "einladung",
@@ -60,6 +65,7 @@ export const resend: ProviderDefinition = {
         "API-Keys nicht in Blokr eintragen.",
       ],
       doneWhen: "{agencyEmail} steht im Team als Admin oder als ausstehende Einladung.",
+      image: schematic("/guides/resend/einladung.svg", "Schema von Invite mit Rolle Admin"),
     },
   ],
 }

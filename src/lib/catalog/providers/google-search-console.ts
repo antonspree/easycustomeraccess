@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const googleSearchConsole: ProviderDefinition = {
   id: "google-search-console",
@@ -15,7 +15,7 @@ export const googleSearchConsole: ProviderDefinition = {
       urlLabel: "Google Search Console öffnen",
       intro: "Search Console hängt am selben Google-Konto wie oft Analytics. Angemeldet sein muss {email}.",
       substeps: [
-        "Öffnen Sie https://search.google.com/search-console.",
+        "Öffnen Sie https://search.google.com/search-console. Die öffentliche Seite heißt Google Search Console, die Schaltfläche Start now bzw. Jetzt starten.",
         "Melden Sie sich mit dem Google-Konto an, das {email} verwendet.",
         "Falls Google ein Kontoauswahlfenster zeigt: genau dieses Konto wählen, nicht ein privates Zweitkonto.",
       ],
@@ -25,6 +25,11 @@ export const googleSearchConsole: ProviderDefinition = {
       ],
       pitfalls: ["Nicht das Agentur-Google-Konto verwenden."],
       doneWhen: "Die Search Console ist mit {email} geöffnet.",
+      image: screenshot(
+        "/guides/google-search-console/konto.png",
+        "Öffentliche Search-Console-Startseite mit der Schaltfläche Start now",
+        "Aufnahme von search.google.com/search-console",
+      ),
     },
     {
       id: "property",
@@ -48,6 +53,7 @@ export const googleSearchConsole: ProviderDefinition = {
         "http und https bzw. www und ohne www sind bei URL-Präfix verschiedene Properties.",
       ],
       doneWhen: "Die Property ist bestätigt, und Sie stehen als Inhaberin bzw. Inhaber.",
+      image: schematic("/guides/google-search-console/property.svg", "Schema von Property hinzufügen"),
     },
     {
       id: "einladung",
@@ -70,6 +76,7 @@ export const googleSearchConsole: ProviderDefinition = {
         "Ohne Google-Konto hinter {agencyEmail} lehnt Search Console den Eintrag ab.",
       ],
       doneWhen: "{agencyEmail} steht als Voller Nutzer. Sie bleiben Inhaberin bzw. Inhaber.",
+      image: schematic("/guides/google-search-console/einladung.svg", "Schema von Nutzer hinzufügen mit vollem Zugriff"),
     },
   ],
 }
