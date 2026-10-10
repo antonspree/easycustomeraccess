@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { one, run } from "@/lib/query"
 
-const cookieName = "eca_session"
+const cookieName = "blokr_session"
 const fourteenDays = 60 * 60 * 24 * 14
 
 type Agency = { id: string; name: string; email: string }

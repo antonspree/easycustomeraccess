@@ -3,8 +3,8 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "Okklar",
-    template: "%s · Okklar",
+    default: "Blokr",
+    template: "%s · Blokr",
   },
   description:
     "Agenturen lassen Konten bei Drittanbietern auf den Namen der Kundschaft laufen. Die Person bestätigt die Schritte über einen geheimen Link.",

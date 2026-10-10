@@ -40,7 +40,7 @@ const common = new Set([
   "liebe",
   "fussball",
   "changeme",
-  "easycustomeraccess",
+  "blokr",
 ])
 
 const rows = ["abcdefghijklmnopqrstuvwxyz", "qwertzuiopasdfghjklyxcvbnm", "qwertyuiopasdfghjklzxcvbnm", "0123456789"]
