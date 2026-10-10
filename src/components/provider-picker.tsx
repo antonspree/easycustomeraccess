@@ -25,7 +25,8 @@ export function ProviderPicker({ defaultSelected }: { defaultSelected?: string[]
       <div>
         <h2 className="text-[20px] font-semibold leading-[1.2]">Anbieter</h2>
         <p className="mt-5 text-[16px] leading-[1.5] text-[#757575]">
-          Ein Link für alle gewählten Anbieter. Die Kundschaft legt die Konten selbst an.
+          Ein Link für alle gewählten Anbieter. Die Kundschaft legt die Konten selbst an und sieht zu jedem Schritt
+          eine ausführliche Anleitung.
         </p>
       </div>
       <input
@@ -84,6 +85,13 @@ export function ProviderPicker({ defaultSelected }: { defaultSelected?: string[]
         <div className="flex flex-col gap-3">
           <h3 className="text-[16px] font-medium leading-[1.5]">{info?.name}</h3>
           <p className="text-[14px] font-normal leading-[1.5] text-[var(--text-64)]">{info?.more}</p>
+          {info ? (
+            <ol className="flex list-decimal flex-col gap-1 pl-5 text-[14px] leading-[1.45] text-[var(--text-64)]">
+              {info.steps.map((step) => (
+                <li key={step.id}>{step.title}</li>
+              ))}
+            </ol>
+          ) : null}
           <button
             type="button"
             className="self-start text-[14px] font-medium leading-[1.5] text-[var(--text-64)]"

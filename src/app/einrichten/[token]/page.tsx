@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
-import { confirmStepAction } from "@/lib/actions"
-import { Button } from "@/components/button"
 import { Column, Frame, washes } from "@/components/frame"
-import { fill } from "@/lib/catalog"
+import { SetupFinish, SetupIntro, SetupOverview, SetupStep } from "@/components/setup-guide"
+import { fillStrings } from "@/lib/catalog"
 import { markOpened, setupByToken } from "@/lib/db"
+import { guideFor } from "@/lib/guide"
 
 export const metadata: Metadata = { title: "Einrichtung" }
 export const dynamic = "force-dynamic"
@@ -30,42 +30,37 @@ export default async function SetupPage({
   }
 
   if (!loaded.setup.opened_at) await markOpened(loaded.setup.id)
-  const { progress, setup } = loaded
+  const { progress, setup, providerIds, confirmations } = loaded
   const vars = {
     email: setup.customer_email,
     agency: setup.agency_name,
     agencyEmail: setup.agency_email,
   }
+  const guide = fillStrings(guideFor(providerIds, confirmations), vars)
 
   return (
     <Frame wash={washes.cream}>
-      <Column className="pt-16">
+      <Column className="pt-12 pb-20">
         <p className="text-[14px] leading-[1.5] text-[var(--text-64)]">{setup.agency_name}</p>
-        {progress.next ? (
+        {guide.current ? (
           <>
-            <p className="mt-8 max-w-[520px] text-[16px] leading-[1.5]">{fill(progress.next.sentence, vars)}</p>
-            <p className="mt-4 text-[14px] leading-[1.5] text-[var(--text-36)]">
-              {progress.confirmed} von {progress.total}
-            </p>
-            {query.hinweis ? (
-              <p className="mt-4 text-[14px] leading-[1.5]">Dieser Schritt ist nicht der nächste.</p>
-            ) : null}
-            <form action={confirmStepAction} className="mt-8">
-              <input type="hidden" name="token" value={token} />
-              <input type="hidden" name="providerId" value={progress.next.providerId} />
-              <input type="hidden" name="stepId" value={progress.next.stepId} />
-              <Button type="submit">Erledigt</Button>
-            </form>
+            <div className="mt-8">
+              <SetupIntro agency={setup.agency_name} vars={vars} providers={guide.providers} started={progress.confirmed > 0} />
+            </div>
+            <SetupOverview providers={guide.providers} />
+            <SetupStep
+              current={guide.current}
+              token={token}
+              vars={vars}
+              hint={Boolean(query.hinweis)}
+              confirmed={progress.confirmed}
+              total={progress.total}
+            />
           </>
         ) : (
-          <>
-            <p className="mt-8 max-w-[520px] text-[16px] leading-[1.5]">
-              Alles bestätigt. {setup.agency_name} sieht den Stand.
-            </p>
-            <p className="mt-4 text-[14px] leading-[1.5] text-[var(--text-36)]">
-              {progress.confirmed} von {progress.total}
-            </p>
-          </>
+          <div className="mt-8">
+            <SetupFinish agency={setup.agency_name} providers={guide.providers} total={progress.total} />
+          </div>
         )}
       </Column>
     </Frame>
