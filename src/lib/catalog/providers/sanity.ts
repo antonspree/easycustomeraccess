@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const sanity: ProviderDefinition = {
   id: "sanity",
@@ -15,14 +15,19 @@ export const sanity: ProviderDefinition = {
       urlLabel: "Einstieg bei Sanity öffnen",
       intro: "Sanity-Projekte hängen an dem Konto, das sie anlegt. Das müssen Sie sein.",
       substeps: [
-        "Öffnen Sie https://www.sanity.io/get-started oder https://www.sanity.io/login.",
-        "Wählen Sie Continue with Google oder Continue with email.",
-        "Bei E-Mail: {email}. Bei Google: nur das Konto mit {email}.",
-        "Schließen Sie die Registrierung ab. Sanity kann einen Bestätigungscode an {email} schicken.",
+        "Öffnen Sie https://www.sanity.io/get-started. Links steht Create your free account.",
+        "Die Buttons heißen Continue with Google, Continue with GitHub und Continue with email.",
+        "Bei E-Mail: {email}. Bei Google oder GitHub: nur das Konto mit {email}.",
+        "Ein Cookie-Banner (Accept / Deny non-essential) kann davor liegen — Accept reicht, um fortzufahren.",
       ],
       tips: ["Ein vorhandenes Sanity-Konto mit {email} können Sie weiterverwenden."],
       pitfalls: ["Nicht das Sanity-Konto der Agentur verwenden."],
       doneWhen: "Sie sind bei Sanity angemeldet und sehen Manage bzw. das Projekt-Dashboard.",
+      image: screenshot(
+        "/guides/sanity/konto.webp",
+        "Öffentliche Sanity-Seite Create your free account mit Google, GitHub und email",
+        "Aufnahme von sanity.io/get-started",
+      ),
     },
     {
       id: "projekt",
@@ -42,6 +47,7 @@ export const sanity: ProviderDefinition = {
       tips: ["Ein vorhandenes eigenes Projekt reicht, wenn Sie darin Administrator bzw. Owner sind."],
       pitfalls: ["Nicht in eine Organisation der Agentur wechseln und dort das Projekt anlegen."],
       doneWhen: "Das Projekt existiert unter Ihrem Konto und trägt Ihren bzw. den Website-Namen.",
+      image: schematic("/guides/sanity/projekt.svg", "Schema von Create new project"),
     },
     {
       id: "einladung",
@@ -64,6 +70,7 @@ export const sanity: ProviderDefinition = {
       ],
       pitfalls: ["Nicht die Organisation an die Agentur übertragen."],
       doneWhen: "{agencyEmail} steht als Administrator oder als ausstehende Einladung. Das Projekt bleibt Ihres.",
+      image: schematic("/guides/sanity/einladung.svg", "Schema von Invite mit Rolle Administrator"),
     },
   ],
 }

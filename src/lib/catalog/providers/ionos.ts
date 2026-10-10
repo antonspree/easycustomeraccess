@@ -1,4 +1,4 @@
-import type { ProviderDefinition } from "../types.ts"
+import { schematic, screenshot, type ProviderDefinition } from "../types.ts"
 
 export const ionos: ProviderDefinition = {
   id: "ionos",
@@ -16,8 +16,8 @@ export const ionos: ProviderDefinition = {
       intro:
         "Bei IONOS ist der Vertragspartner die Person, die das Kundenkonto besitzt. Das müssen Sie bleiben. Die Agentur bekommt später nur einen zusätzlichen Benutzer.",
       substeps: [
-        "Öffnen Sie https://www.ionos.de/ oder direkt https://login.ionos.de/.",
-        "Wenn Sie noch kein Konto haben: wählen Sie Registrieren bzw. folgen Sie einem Produktkauf als Sie selbst.",
+        "Öffnen Sie https://login.ionos.de/. Die Karte heißt Mein IONOS Login. Das Feld lautet Kundennummer, E-Mail-Adresse oder Domain, die Schaltfläche Weiter.",
+        "Noch kein IONOS Kunde? darunter führt zur Registrierung. Ein Cookie-Banner fragt nach Akzeptieren, Ablehnen oder Einstellungen.",
         "Tragen Sie Ihren Namen, Ihre Adresse und {email} ein — nicht die Daten von {agency}.",
         "Haben Sie schon ein IONOS-Konto: melden Sie sich im Control Center an und prüfen Sie, dass der Vertrag auf Sie läuft.",
       ],
@@ -30,6 +30,11 @@ export const ionos: ProviderDefinition = {
         "Nicht das Agentur-IONOS-Konto verwenden.",
       ],
       doneWhen: "Sie sind im IONOS Control Center, und das Konto bzw. der Vertrag läuft auf Ihren Namen.",
+      image: screenshot(
+        "/guides/ionos/konto.png",
+        "Öffentliche IONOS-Loginseite Mein IONOS Login mit Weiter und Cookie-Banner",
+        "Aufnahme von login.ionos.de",
+      ),
     },
     {
       id: "email",
@@ -45,6 +50,7 @@ export const ionos: ProviderDefinition = {
       tips: ["Keine Mail? Im Login unter „E-Mail erneut senden“ nachschauen oder den Chat von IONOS fragen."],
       pitfalls: ["2-Faktor-Gerät muss Ihres sein, nicht das der Agentur."],
       doneWhen: "Der Login ins Control Center klappt ohne ausstehende Registrierungsmail.",
+      image: schematic("/guides/ionos/email.svg", "Schema der IONOS-Registrierungsmail"),
     },
     {
       id: "domain",
@@ -66,6 +72,7 @@ export const ionos: ProviderDefinition = {
         "Auth-Code / Auth-Info nicht ungesichert verschicken.",
       ],
       doneWhen: "Die Domain liegt in Ihrem IONOS-Vertrag bzw. Sie wissen mit {agency}, wie der Umzug läuft.",
+      image: schematic("/guides/ionos/domain.svg", "Schema der Domainliste im Control Center"),
     },
     {
       id: "benutzer",
@@ -93,6 +100,7 @@ export const ionos: ProviderDefinition = {
       ],
       doneWhen: "{agencyEmail} ist als zusätzlicher Benutzer eingetragen oder hat eine offene Einladung. Der Vertrag bleibt auf Ihren Namen.",
       help: "Fehlt der Menüpunkt, sagt IONOS den Vertragstyp. Schreiben Sie {agency} — die Agentur hilft beim Finden, ändert den Vertrag aber nicht selbst.",
+      image: schematic("/guides/ionos/benutzer.svg", "Schema von Benutzer & Rechte ohne Kündigungsrecht"),
     },
   ],
 }
