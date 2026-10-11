@@ -13,7 +13,7 @@ import { providers } from "@/lib/catalog"
 
 const roles: Record<string, string> = {
   supabase: "Datenbank, Owner bleibt die Kundschaft",
-  vercel: "Hosting, Member im Tarif Hobby",
+  vercel: "Hosting, Developer im Tarif Pro",
   netlify: "Hosting, Developer",
   cloudflare: "DNS, Administrator",
   github: "Code, Member",

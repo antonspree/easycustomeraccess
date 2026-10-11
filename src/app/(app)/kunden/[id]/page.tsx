@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { CopyLink } from "@/components/copy-link"
+import { CustomerPreview } from "@/components/customer-preview"
 import { Column } from "@/components/frame"
 import { requireSession } from "@/lib/auth"
 import { fill } from "@/lib/catalog"
@@ -54,6 +55,16 @@ export default async function CustomerLinkPage({ params }: { params: Promise<{ i
           <div className="mt-5">
             <CopyLink url={url} />
           </div>
+          <p className="mt-3">
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[14px] font-medium leading-[1.5] text-[var(--text-64)] underline decoration-[rgba(21,21,21,0.2)] underline-offset-4"
+            >
+              Kundenansicht öffnen
+            </a>
+          </p>
           <div className="mt-8 flex items-center gap-4">
             <Link href="/uebersicht" className="text-[14px] font-medium leading-[1.5] text-[var(--text-64)]">
               Zur Übersicht
@@ -66,6 +77,7 @@ export default async function CustomerLinkPage({ params }: { params: Promise<{ i
             </Link>
           </div>
         </div>
+        <CustomerPreview providerIds={loaded.providers.map((provider) => provider.id)} vars={vars} />
       </Column>
   )
 }

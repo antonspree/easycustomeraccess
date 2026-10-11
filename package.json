@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 43133",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/progress.test.ts src/lib/password-strength.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/progress.test.ts src/lib/password-strength.test.ts src/lib/catalog.test.ts src/lib/guide.test.ts",
+    "guides:schematics": "node scripts/generate-schematics.mjs",
+    "guides:capture": "node scripts/capture-public-guides.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -23,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
+    "puppeteer-core": "^25.13.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

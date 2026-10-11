@@ -175,11 +175,10 @@ export async function setupByToken(token: string) {
     "SELECT provider_id, step_id FROM step_confirmations WHERE setup_id = ?",
     [setup.id],
   )
-  const progress = progressFor(
-    orderedProviders(rows.map((row) => row.provider_id)),
-    confirmations.map((row) => ({ providerId: row.provider_id, stepId: row.step_id })),
-  )
-  return { setup, progress }
+  const providerIds = rows.map((row) => row.provider_id)
+  const mapped = confirmations.map((row) => ({ providerId: row.provider_id, stepId: row.step_id }))
+  const progress = progressFor(orderedProviders(providerIds), mapped)
+  return { setup, progress, providerIds, confirmations: mapped }
 }
 
 export async function markOpened(setupId: string) {
